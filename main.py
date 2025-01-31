@@ -1,7 +1,7 @@
 import configparser
 from sqlalchemy import create_engine, text, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
-
+import jwt
 
 # Fichier de configuration
 config = configparser.ConfigParser()
@@ -49,3 +49,20 @@ session.commit()
 print(user.id)  # None
 query = session.query(User).filter_by(name="John Snow")
 print(query.count())
+
+
+SECRET_KEY = 'test_secret'
+
+payload_data = {
+    "sub": "4242",
+    "name": "Jessica Temporal",
+    "nickname": "Jess"
+}
+
+def generate_token(payload, secret_key):
+    token = jwt.encode(
+        payload=payload,
+        key=secret_key,
+        algorithm="HS256"
+    )
+    return token
