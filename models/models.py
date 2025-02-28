@@ -16,18 +16,19 @@ class User(Base):
     __tablename__ = 'user'
     id: Mapped[int] = mapped_column(primary_key=True)
     password: Mapped[str] = mapped_column(String(128), nullable=False)
-    first_name: Mapped[str] = mapped_column(String(100))
-    last_name: Mapped[str] = mapped_column(String(100))
-    email_address: Mapped[str] = mapped_column(String(100))
+    token: Mapped[str] = mapped_column(String(512), nullable=True)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    email_address: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(String(12))
-    team_id = mapped_column(ForeignKey("team.id"))
+    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"))
 
     team: Mapped[Team] = relationship(back_populates="users")
-    clients: Mapped[List["Client"]] = relationship(back_populates="commercial")
+    """clients: Mapped[List["Client"]] = relationship(back_populates="commercial")
     contracts: Mapped[List["Contract"]] = relationship(back_populates="commercial")
-    events: Mapped[List["Event"]] = relationship(back_populates="support")
+    events: Mapped[List["Event"]] = relationship(back_populates="support")"""
 
-class Client(Base):
+"""class Client(Base):
     __tablename__ = "client"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -72,7 +73,7 @@ class Event(Base):
 
     client: Mapped[Client] = relationship(back_populates="events")
     support: Mapped[User] = relationship(back_populates="events")
-    contract: Mapped[Contract] = relationship(back_populates="event")
+    contract: Mapped[Contract] = relationship(back_populates="event")"""
 
 
 
