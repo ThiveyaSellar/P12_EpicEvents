@@ -1,7 +1,7 @@
 import click, jwt, os, platform
 from datetime import datetime, timezone, timedelta
 
-from models.models import User
+from models import User
 
 def is_token_expired(token):
     try:

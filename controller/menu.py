@@ -1,19 +1,22 @@
-import configparser, click, jwt, os, sys
+import os, sys
+# Ajouter le répertoire racine au sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import configparser, click, jwt, datetime
+from datetime import datetime, timedelta
+from argon2 import PasswordHasher
 
 from sqlalchemy import create_engine, text, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Ajouter le répertoire racine au sys.path
-from views.cli import display_login_registration_menu
-from utils.token_utils import get_netrc_path, get_tokens_from_netrc, \
+from models import User, Team, Event, Contract, Client
+# from views.cli import display_login_registration_menu
+from utils.token_utils import  create_netrc_file, get_netrc_path, get_tokens_from_netrc, \
     update_tokens_in_netrc, get_user_from_access_token
 from utils.token_utils import generate_tokens, is_token_expired
 from utils.db_utils import create_database_if_not_existent
-from views.cli import cli  # Importer la fonction cli
-
 
 # Récupérer les infos de connexion à la base de données depuis le fichier config.ini
 config = configparser.ConfigParser()
@@ -49,46 +52,21 @@ Base.metadata.create_all(engine)
 # Clé secrète pour signer le jeton JWT
 SECRET_KEY = "nvlzhvgi476hcich90796"
 
-"""
-    # -----------------------------------------------------------------------
-"""
-
-import datetime
-from datetime import datetime, timedelta
-
-
-import click, jwt, os
-
-from sqlalchemy.exc import NoResultFound
-
-from argon2 import PasswordHasher
-
-from models import User, Team, Event, Contract, Client
-from utils.token_utils import create_netrc_file, update_tokens_in_netrc, \
-    get_netrc_path
-
 @click.group()
 def cli():
-    """Interface en ligne de commande"""
     pass
 
+@cli.command()
+@click.argument("nom")
+def salut(nom):
+    """Dit bonjour à l'utilisateur."""
+    click.echo(f"Bonjour, {nom} !")
 
 @cli.command()
-def seed_teams():
-    """Ajoute des équipes par défaut à la base de données."""
-    default_teams = ["Commercial", "Gestion", "Support"]
-
-    for team_name in default_teams:
-        if not session.query(Team).filter_by(name=team_name).first():
-            team = Team(name=team_name)
-            session.add(team)
-            click.echo(f"Équipe '{team_name}' ajoutée.")
-        else:
-            click.echo(f"Équipe '{team_name}' existe déjà.")
-
-    session.commit()
-    click.echo("Toutes les équipes par défaut ont été ajoutées.")
-
+@click.argument("nom")
+def bye(nom):
+    """Dit bonjour à l'utilisateur."""
+    click.echo(f"Bye, {nom} !")
 
 @cli.command()
 @click.option("--email", prompt="Email", help="Votre email")
@@ -140,6 +118,7 @@ def login(email, password):
         else:
             update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
+            print("Netrc updated")
 
         # Enregistrer le refresh token dans la base de données
         user.token = refresh_token
@@ -193,9 +172,14 @@ def register(email, password, password2, first_name, last_name, phone, team):
 
     click.echo(f"Inscription réussie pour {first_name} {last_name}.")
 
+def display_menu(user):
+    click.echo(f"Bienvenue {user.first_name} !")
 
 def display_login_registration_menu(session, SECRET_KEY):
-    click.echo("Bienvenue !")
+    click.echo("------------- Menu principal -------------")
+    click.echo("1- Inscription")
+    click.echo("2- Connexion")
+    click.echo("3- Quitter")
     choice = click.prompt(
         "Choisissez une option : 1- Connexion 2- Inscription", type=int)
     while choice not in [1, 2, 3]:
@@ -204,7 +188,6 @@ def display_login_registration_menu(session, SECRET_KEY):
             "Choisissez une option : 1- Connexion, 2- Inscription, 3- Quitter",
             type=int
         )
-
     # On exécute la commande en fonction du choix de l'utilisateur
     if choice == 1:
         # Connexion
@@ -219,123 +202,67 @@ def display_login_registration_menu(session, SECRET_KEY):
         click.echo("Vous avez choisi de quitter.")
         return
 
-@cli.command()
-def seed_teams():
-
-    """Ajoute des équipes par défaut à la base de données."""
-    default_teams = ["Commercial","Gestion","Support"]
-
-    for team_name in default_teams:
-        if not session.query(Team).filter_by(name=team_name).first():
-            team = Team(name=team_name)
-            session.add(team)
-            click.echo(f"Équipe '{team_name}' ajoutée.")
-        else:
-            click.echo(f"Équipe '{team_name}' existe déjà.")
-
-    session.commit()
-    click.echo("Toutes les équipes par défaut ont été ajoutées.")
-
-"""
-    # -----------------------------------------------------------------------
-"""
-
-
-def check_permissions(user, team):
-    if user.get("team") == team:
-        return True
-    return False
-
-def menu_principal():
-
+def show_login_menu():
+    options = {"register","login",}
     while True:
-        click.echo("------------- Menu principal -------------")
-        click.echo("1- Inscription")
-        click.echo("2- Connexion")
-        click.echo("3- Quitter")
-        choice = click.prompt("Choisissez une option", type=int)
-        try:
-            cmd = input("Commande > ")
-            if cmd.lower() in ["exit", "quit"]:
-                break
-            cli.main(cmd.split(), standalone_mode=False)
-        except Exception as e:
-            click.echo(f"Erreur : {e}")
-        while choice not in [1, 2, 3]:
-            click.echo("Choix invalide, veuillez réessayer.")
-            click.echo("1- Inscription")
-            click.echo("2- Connexion")
-            click.echo("3- Quitter")
-            choice = click.prompt("Choisissez une option", type=int)
-        # On exécute la commande en fonction du choix de l'utilisateur
-        if choice == 1:
-            # Inscription
-            click.echo("Vous avez choisi de vous inscrire.")
-            cli(["register"])
-            continue
-        elif choice == 2:
-            # Connexion
-            click.echo("Vous avez choisi de vous connecter.")
-            cli(["login"])
-        elif choice == 3:
-            # Quitter
-            click.echo("Vous avez choisi de quitter.")
-            return
-        try:
-            cmd = input("Commande > ")
-            if cmd.lower() in ["exit", "quit"]:
-                break
-            cli.main(cmd.split(), standalone_mode=False)
-        except Exception as e:
-            click.echo(f"Erreur : {e}")
-
-def display_menu(user):
-    click.echo(f"Bienvenue {user.first_name} !")
-    if user.team.name == "Commercial":
-        click.echo("Vous êtes dans l'équipe commerciale.")
-        clients = session.query(Client).all()
-        for client in clients:
-            click.echo(f"{client.first_name} {client.last_name}")
-        events = session.query(Event).all()
-        for event in events:
-            click.echo(f"{event.name} {event.end_date}")
-    elif user.team.name == "Gestion":
-        click.echo("Vous êtes dans l'équipe de gestion.")
-    elif user.team.name == "Support":
-        click.echo("Vous êtes dans l'équipe de support.")
+        click.echo("\n------------- Main -------------")
+        click.echo("Please enter a command :")
+        click.echo("1- register")
+        click.echo("2- login")
+        click.echo("3- exit")
+    click.echo("------------- Main -------------")
+    click.echo("Please enter a command :")
+    click.echo("1- register")
+    click.echo("2- login")
+    click.echo("3- exit")
+    cmd = input("Commande > ")
+    while cmd.lower() not in ['login', 'register', 'exit']:
+        click.echo("------------- Main -------------")
+        click.echo("1- register")
+        click.echo("2- login")
+        click.echo("3- exit")
+        cmd = input("Commande > ")
+    return cmd
 
 def main():
-
-    expired_session = False
-    netrc_path = get_netrc_path()
     machine = "127.0.0.1"
-    # Récupérer les tokens dans le fichier .netrc
+    netrc_path = get_netrc_path()
+    connected = False
     access_token, refresh_token = get_tokens_from_netrc(machine, netrc_path)
-    # Il n'y a pas de tokens dans .netrc
-    if not access_token and refresh_token:
-        # Inscription ou première connexion
-        display_login_registration_menu(session, SECRET_KEY)
-    else:
+
+    if access_token and refresh_token:
         # Récupérer les informations de l'utilisateur dans le jeton d'accès
         user = get_user_from_access_token(access_token, SECRET_KEY, session)
-        # Vérifier 
         if is_token_expired(access_token):
             if is_token_expired(refresh_token):
-                expired_session = True
+                connected = False
             else:
                 # Générer un nouveau access token
                 access_token, refresh_token = generate_tokens(user, SECRET_KEY)
                 update_tokens_in_netrc(
                     machine, access_token, refresh_token, netrc_path
                 )
+                connected = True
+    if not connected:
+        cmd = show_login_menu()
+        if cmd == 'exit':
+            exit()
+        cli.main(cmd.split(), standalone_mode=False)
 
-        if expired_session:
-            click.echo("Session expirée.")
-            display_login_registration_menu(session, SECRET_KEY)
-        else:
-            display_menu(user)
+    while True:
+        try:
+            click.echo(f"------------- Menu {user.team.name} -------------")
+            print("Menu")
+            click.echo("1- Inscription")
+            click.echo("2- Connexion")
+            click.echo("3- Quitter")
+            cmd = input("Commande > ")
+            if cmd.lower() in ["exit", "quit"]:
+                break
+            cli.main(cmd.split(), standalone_mode=False)
+        except Exception as e:
+            click.echo(f"Erreur : {e}")
 
 if __name__ == "__main__":
-    # cli()
     main()
-    # menu_principal()
+

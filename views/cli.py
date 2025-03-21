@@ -6,7 +6,7 @@ from sqlalchemy.exc import NoResultFound
 
 from argon2 import PasswordHasher
 
-from models.models import Team, User
+from models import Team, User
 from utils.token_utils import create_netrc_file, update_tokens_in_netrc, \
     get_netrc_path
 
