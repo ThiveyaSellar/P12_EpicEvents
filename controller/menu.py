@@ -118,8 +118,6 @@ def login(email, password):
         else:
             update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
-            print("Netrc updated")
-
         # Enregistrer le refresh token dans la base de données
         user.token = refresh_token
         session.commit()
@@ -172,6 +170,20 @@ def register(email, password, password2, first_name, last_name, phone, team):
 
     click.echo(f"Inscription réussie pour {first_name} {last_name}.")
 
+@cli.command()
+def show_clients():
+    clients = session.query(Client).all()
+    click.echo("------------- Clients -------------")
+    for client in clients:
+        click.echo(f"{client.first_name} {client.last_name}")
+
+@cli.command()
+def show_events():
+    events = session.query(Event).all()
+    click.echo("------------- Events -------------")
+    for event in events:
+        click.echo(f"{event.name} {event.end_date}")
+
 def display_menu(user):
     click.echo(f"Bienvenue {user.first_name} !")
 
@@ -203,26 +215,17 @@ def display_login_registration_menu(session, SECRET_KEY):
         return
 
 def show_login_menu():
-    options = {"register","login",}
+    options = {"register","login","exit"}
     while True:
         click.echo("\n------------- Main -------------")
         click.echo("Please enter a command :")
         click.echo("1- register")
         click.echo("2- login")
         click.echo("3- exit")
-    click.echo("------------- Main -------------")
-    click.echo("Please enter a command :")
-    click.echo("1- register")
-    click.echo("2- login")
-    click.echo("3- exit")
-    cmd = input("Commande > ")
-    while cmd.lower() not in ['login', 'register', 'exit']:
-        click.echo("------------- Main -------------")
-        click.echo("1- register")
-        click.echo("2- login")
-        click.echo("3- exit")
-        cmd = input("Commande > ")
-    return cmd
+        cmd = input("Commande > ").strip().lower()
+        if cmd in options:
+            return cmd
+        click.echo("Commande invalide, veuillez réessayer.")
 
 def main():
     machine = "127.0.0.1"
@@ -252,10 +255,9 @@ def main():
     while True:
         try:
             click.echo(f"------------- Menu {user.team.name} -------------")
-            print("Menu")
-            click.echo("1- Inscription")
-            click.echo("2- Connexion")
-            click.echo("3- Quitter")
+            click.echo("1- show-clients")
+            click.echo("2- show-events")
+            click.echo("4- logout")
             cmd = input("Commande > ")
             if cmd.lower() in ["exit", "quit"]:
                 break
