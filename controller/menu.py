@@ -18,6 +18,8 @@ from utils.token_utils import  create_netrc_file, get_netrc_path, get_tokens_fro
 from utils.token_utils import generate_tokens, is_token_expired
 from utils.db_utils import create_database_if_not_existent
 
+import LoginController
+
 # Récupérer les infos de connexion à la base de données depuis le fichier config.ini
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -56,24 +58,14 @@ SECRET_KEY = "nvlzhvgi476hcich90796"
 def cli():
     pass
 
-@cli.command()
-@click.argument("nom")
-def salut(nom):
-    """Dit bonjour à l'utilisateur."""
-    click.echo(f"Bonjour, {nom} !")
 
-@cli.command()
-@click.argument("nom")
-def bye(nom):
-    """Dit bonjour à l'utilisateur."""
-    click.echo(f"Bye, {nom} !")
-
-@cli.command()
+"""@cli.command()
 @click.option("--email", prompt="Email", help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True,
               help="Votre mot de passe")
 def login(email, password):
-    """Commande de connexion"""
+    #Commande de connexion
+    # logique
     try:
         # Vérification si le mail de l'utilisateur existe
         user = session.query(User).filter_by(email_address=email).one()
@@ -84,6 +76,7 @@ def login(email, password):
         try:
             ph.verify(user.password, password)
         except:
+            # affichage
             click.echo("Mot de passe incorrect.")
             return
 
@@ -126,7 +119,7 @@ def login(email, password):
         click.echo(f"Bienvenue {user.first_name} {user.last_name}!")
 
     except NoResultFound:
-        click.echo("Utilisateur introuvable.")
+        click.echo("Utilisateur introuvable.")"""
 
 
 @cli.command()
@@ -264,6 +257,10 @@ def main():
             cli.main(cmd.split(), standalone_mode=False)
         except Exception as e:
             click.echo(f"Erreur : {e}")
+
+class MenuView:
+
+
 
 if __name__ == "__main__":
     main()
