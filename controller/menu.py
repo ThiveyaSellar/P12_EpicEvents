@@ -19,6 +19,9 @@ from utils.token_utils import generate_tokens, is_token_expired
 from utils.db_utils import create_database_if_not_existent
 
 import LoginController
+#from MenuController import MenuController
+from views.MenuView import MenuView
+
 
 # Récupérer les infos de connexion à la base de données depuis le fichier config.ini
 config = configparser.ConfigParser()
@@ -54,12 +57,44 @@ Base.metadata.create_all(engine)
 # Clé secrète pour signer le jeton JWT
 SECRET_KEY = "nvlzhvgi476hcich90796"
 
+class MenuController:
+
+    def __init__(self):
+        self.view = MenuView()
+
+    """@staticmethod
+    @click.group()
+    def cli():
+        pass"""
+
+    def create_login_menu(self):
+        cmd = self.view.show_login_menu()
+        if cmd == 'exit':
+            exit()
+        cli.main(cmd.split(), standalone_mode=False)
+
+    def create_main_menu(self, user):
+        while True:
+            try:
+                team = user.team.name
+                # Print menu and get command from user input
+                self.view.show_main_menu(team)
+                cmd = self.view.ask_cmd_input()
+                if cmd.lower() in ["exit", "quit"]:
+                    break
+                cli.main(cmd.split(), standalone_mode=False)
+            except Exception as e:
+                click.echo(f"Erreur : {e}")
+                break
+
+
+
 @click.group()
 def cli():
     pass
 
 
-"""@cli.command()
+@cli.command()
 @click.option("--email", prompt="Email", help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True,
               help="Votre mot de passe")
@@ -119,7 +154,7 @@ def login(email, password):
         click.echo(f"Bienvenue {user.first_name} {user.last_name}!")
 
     except NoResultFound:
-        click.echo("Utilisateur introuvable.")"""
+        click.echo("Utilisateur introuvable.")
 
 
 @cli.command()
@@ -207,20 +242,9 @@ def display_login_registration_menu(session, SECRET_KEY):
         click.echo("Vous avez choisi de quitter.")
         return
 
-def show_login_menu():
-    options = {"register","login","exit"}
-    while True:
-        click.echo("\n------------- Main -------------")
-        click.echo("Please enter a command :")
-        click.echo("1- register")
-        click.echo("2- login")
-        click.echo("3- exit")
-        cmd = input("Commande > ").strip().lower()
-        if cmd in options:
-            return cmd
-        click.echo("Commande invalide, veuillez réessayer.")
-
 def main():
+
+    menu_controller = MenuController()
     machine = "127.0.0.1"
     netrc_path = get_netrc_path()
     connected = False
@@ -240,25 +264,9 @@ def main():
                 )
                 connected = True
     if not connected:
-        cmd = show_login_menu()
-        if cmd == 'exit':
-            exit()
-        cli.main(cmd.split(), standalone_mode=False)
+        menu_controller.create_login_menu()
 
-    while True:
-        try:
-            click.echo(f"------------- Menu {user.team.name} -------------")
-            click.echo("1- show-clients")
-            click.echo("2- show-events")
-            click.echo("4- logout")
-            cmd = input("Commande > ")
-            if cmd.lower() in ["exit", "quit"]:
-                break
-            cli.main(cmd.split(), standalone_mode=False)
-        except Exception as e:
-            click.echo(f"Erreur : {e}")
-
-class MenuView:
+    menu_controller.create_main_menu(user)
 
 
 
