@@ -48,7 +48,6 @@ class Settings:
         # Créer les tables
         Base.metadata.create_all(self.engine)
 
-
     def get_secret_key(self):
         self.secret_key = self.config['jwt']['SECRET_KEY']
 

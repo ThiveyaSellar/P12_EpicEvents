@@ -1,44 +1,31 @@
-import os, sys
+import os, sys, click, jwt, datetime
+from argon2 import PasswordHasher
+from datetime import datetime, timedelta
+from sqlalchemy.exc import NoResultFound
+
 # Ajouter le répertoire racine au sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import click, jwt, datetime
-from datetime import datetime, timedelta
-from argon2 import PasswordHasher
 
-from sqlalchemy import create_engine, text, Column, Integer, String
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.exc import NoResultFound
-
-
+from utils.token_utils import  create_netrc_file, get_netrc_path, \
+    get_tokens_from_netrc, update_tokens_in_netrc, get_user_from_access_token, \
+    generate_tokens, is_token_expired
 from models import User, Team, Event, Contract, Client
-# from views.cli import display_login_registration_menu
-from utils.token_utils import  create_netrc_file, get_netrc_path, get_tokens_from_netrc, \
-    update_tokens_in_netrc, get_user_from_access_token
-from utils.token_utils import generate_tokens, is_token_expired
 
-import LoginController
 # from MenuController import MenuController
+from LoginController2 import LoginController
 from views.MenuView import MenuView
 
 from settings import Settings
 
 settings = Settings()
-
 session = settings.session
-
 SECRET_KEY = settings.secret_key
-
 
 class MenuController:
 
     def __init__(self):
         self.view = MenuView()
-
-    @staticmethod
-    @click.group()
-    def cli():
-        pass
 
     def create_login_menu(self):
         cmd = self.view.show_login_menu()
@@ -66,11 +53,19 @@ def cli():
 
 @cli.command()
 @click.option("--email", prompt="Email", help="Votre email")
+@click.option("--password", prompt="Mot de passe", hide_input=True, help="Votre mot de passe")
+def login(email, password):
+    controller = LoginController()
+    controller.login(email, password, session, SECRET_KEY)
+
+"""@cli.command()
+@click.option("--email", prompt="Email", help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True,
               help="Votre mot de passe")
 def login(email, password):
     #Commande de connexion
     # logique
+    print("A")
     try:
         # Vérification si le mail de l'utilisateur existe
         user = session.query(User).filter_by(email_address=email).one()
@@ -79,12 +74,14 @@ def login(email, password):
         # Permet de comparer avec un mdp haché stocké en base de données
         ph = PasswordHasher()
         try:
+            print("B")
             ph.verify(user.password, password)
+            print("C")
         except:
             # affichage
             click.echo("Mot de passe incorrect.")
             return
-
+        print("D")
         # Génération des jetons d'accès et de rafraichissement JWT
         payload = {
             "user_id": user.id,
@@ -94,7 +91,7 @@ def login(email, password):
             # Expiration dans 1h
         }
         access_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-
+        print("E")
         payload = {
             "user_id": user.id,
             "email": user.email_address,
@@ -102,7 +99,7 @@ def login(email, password):
             "exp": datetime.now() + timedelta(hours=3)
         }
         refresh_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-
+        print("F")
         netrc_path = get_netrc_path()
 
         # Stocker le jeton dans le fichier .netrc
@@ -180,37 +177,7 @@ def show_events():
     events = session.query(Event).all()
     click.echo("------------- Events -------------")
     for event in events:
-        click.echo(f"{event.name} {event.end_date}")
-
-def display_menu(user):
-    click.echo(f"Bienvenue {user.first_name} !")
-
-def display_login_registration_menu(session, SECRET_KEY):
-    click.echo("------------- Menu principal -------------")
-    click.echo("1- Inscription")
-    click.echo("2- Connexion")
-    click.echo("3- Quitter")
-    choice = click.prompt(
-        "Choisissez une option : 1- Connexion 2- Inscription", type=int)
-    while choice not in [1, 2, 3]:
-        click.echo("Choix invalide, veuillez réessayer.")
-        choice = click.prompt(
-            "Choisissez une option : 1- Connexion, 2- Inscription, 3- Quitter",
-            type=int
-        )
-    # On exécute la commande en fonction du choix de l'utilisateur
-    if choice == 1:
-        # Connexion
-        click.echo("Vous avez choisi de vous connecter.")
-        cli(["login"])
-    elif choice == 2:
-        # Inscription
-        click.echo("Vous avez choisi de vous inscrire.")
-        cli(["register"])
-    elif choice == 3:
-        # Quitter
-        click.echo("Vous avez choisi de quitter.")
-        return
+        click.echo(f"{event.name} {event.end_date}")"""
 
 def main():
 

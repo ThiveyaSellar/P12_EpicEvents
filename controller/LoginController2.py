@@ -1,16 +1,12 @@
-from views import LoginView
-from models import User
+import click, jwt, os
+from models import User, Team, Event, Contract, Client
 from argon2 import PasswordHasher
-
-import jwt, os
 from datetime import datetime, timedelta
 from sqlalchemy.exc import NoResultFound
 
-import click
-
-from forms import LoginForm
-from menu_refactor import cli
-
+from utils.token_utils import  create_netrc_file, get_netrc_path, \
+    get_tokens_from_netrc, update_tokens_in_netrc, get_user_from_access_token, \
+    generate_tokens, is_token_expired
 
 class LoginView:
 
@@ -46,19 +42,18 @@ class LoginForm:
 
 class LoginController:
 
-    def login(self):
+    def login(self, email, password, session, SECRET_KEY):
         loginView = LoginView()
-        loginForm = loginView.login()
 
         try:
             # Vérification si le mail de l'utilisateur existe
-            user = session.query(User).filter_by(email_address=loginForm.email).one()
+            user = session.query(User).filter_by(email_address=email).one()
 
             # Permet d'hacher le mdp en version sécurisée et illisible
             # Permet de comparer avec un mdp haché stocké en base de données
             ph = PasswordHasher()
             try:
-                ph.verify(user.password, loginForm.password)
+                ph.verify(user.password, password)
             except:
                 # affichage
                 LoginView.show_password_error()
@@ -99,8 +94,7 @@ class LoginController:
                 update_tokens_in_netrc(machine, access_token, refresh_token,
                                        netrc_path)
 
-            loginView.show_welcome_message()
+            loginView.show_welcome_message(user)
 
         except NoResultFound:
             LoginView.show_user_not_found()
-
