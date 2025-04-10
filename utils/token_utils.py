@@ -149,18 +149,15 @@ def create_netrc_file(machine, access_token, refresh_token, netrc_path):
     print(f"Le fichier .netrc a été créé et les informations ajoutées à {netrc_path}")
 
 def get_user_from_access_token(access_token, SECRET_KEY, session):
-    print("A")
     try:
         payload = jwt.decode(access_token, SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get("user_id")
         user = session.get(User, user_id)
         return user
     except jwt.ExpiredSignatureError:
-        print("B")
         click.echo("Token expiré.")
         return None
     except jwt.InvalidTokenError:
-        print("C")
         click.echo("Token invalide.")
         return None
 
