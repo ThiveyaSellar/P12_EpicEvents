@@ -30,7 +30,7 @@ class MenuView:
             MenuView.error_message_invalid_cmd()
 
     @staticmethod
-    def show_main_menu(team):
+    def show_main_menu(user, team):
         click.echo(f"------------- Menu {team} -------------")
         click.echo("1- show-clients")
         click.echo("2- show-events")

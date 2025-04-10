@@ -10,13 +10,6 @@ from utils.token_utils import  create_netrc_file, get_netrc_path, \
 
 class LoginView:
 
-    """@cli.command()
-    @click.option("--email", prompt="Email", help="Votre email")
-    @click.option("--password", prompt="Mot de passe", hide_input=True,
-                  help="Votre mot de passe")
-    def login(email, password):
-        return LoginForm(email, password)"""
-
     @staticmethod
     def print_password_error():
         click.echo("Mot de passe incorrect.")

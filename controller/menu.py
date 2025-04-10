@@ -14,6 +14,7 @@ from models import User, Team, Event, Contract, Client
 
 # from MenuController import MenuController
 from LoginController import LoginController
+from RegisterController import RegisterController
 from views.MenuView import MenuView
 
 from settings import Settings
@@ -22,7 +23,7 @@ settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
 
-class MenuController:
+"""class MenuController:
 
     def __init__(self):
         self.view = MenuView()
@@ -38,61 +39,15 @@ class MenuController:
             try:
                 team = user.team.name
                 # Print menu and get command from user input
-                self.view.show_main_menu(team)
+                self.view.show_main_menu(user, team)
                 cmd = self.view.ask_cmd_input()
                 if cmd.lower() in ["exit", "quit"]:
                     break
                 cli.main(cmd.split(), standalone_mode=False)
             except Exception as e:
                 click.echo(f"Erreur : {e}")
-                break
+                break"""
 
-class RegisterView:
-
-    def print_password_error(self):
-        click.echo(f"Les mots de passe ne matchent pas.")
-
-    def success_message(self, first_name, last_name):
-        click.echo(f"Inscription réussie pour {first_name} {last_name}.")
-
-
-class RegisterController:
-
-    def validate_password(self, password, password2):
-        return password == password2
-
-    def __hash_passwords(self, password):
-        ph = PasswordHasher()
-        return ph.hash(password)
-
-    def register(self, email, password, password2, first_name, last_name, phone, team):
-        registerView = RegisterView()
-
-        if not self.validate_password(password, password2):
-            registerView.print_password_error()
-            return
-
-        # Hachage du mot de passe
-        hashed_password = self.__hash_passwords(password)
-
-        # Récupérer l'id de l'équipe
-        team_id = session.query(Team).filter_by(name=team).one().id
-
-        # Création de l'utilisateur
-        new_user = User(
-            password=hashed_password,
-            first_name=first_name,
-            last_name=last_name,
-            email_address=email,
-            phone=phone,
-            team_id=team_id
-        )
-
-        # Enregistrement dans la base de données
-        session.add(new_user)
-        session.commit()
-
-        registerView.success_message(first_name, last_name)
 
 @click.group()
 def cli():
@@ -122,50 +77,6 @@ def login(email, password):
 def register(email, password, password2, first_name, last_name, phone, team):
     controller = RegisterController()
     controller.register(email, password, password2, first_name, last_name, phone, team)
-
-
-"""
-@cli.command()
-@click.option("--email", prompt="Email", help="Votre email")
-@click.option("--password", prompt="Mot de passe", hide_input=True,
-              help="Votre mot de passe")
-@click.option("--password2", prompt="Confirmation de mot de passe",
-              hide_input=True,
-              help="Votre mot de passe")
-@click.option("--first_name", prompt="Prénom", help="Votre prénom")
-@click.option("--last_name", prompt="Nom", help="Votre nom")
-@click.option("--phone", prompt="Numéro de téléphone", help="Votre téléphone")
-@click.option("--team", type=click.Choice(["Commercial", "Gestion", "Support"],
-                                          case_sensitive=False),
-              prompt="Équipe", help="Votre équipe")
-def register(email, password, password2, first_name, last_name, phone, team):
-    if password != password2:
-        click.echo(f"Les mots de passe ne matchent pas.")
-        return
-
-    ph = PasswordHasher()
-    # Hachage du mot de passe
-    hashed_password = ph.hash(password)
-
-    # Récupérer l'id de l'équipe
-    team_id = session.query(Team).filter_by(name=team).one().id
-
-    # Création de l'utilisateur
-    new_user = User(
-        password=hashed_password,
-        first_name=first_name,
-        last_name=last_name,
-        email_address=email,
-        phone=phone,
-        team_id=team_id
-    )
-
-    # Enregistrement dans la base de données
-    session.add(new_user)
-    session.commit()
-
-    click.echo(f"Inscription réussie pour {first_name} {last_name}.")
-"""
 
 @cli.command()
 def show_clients():
