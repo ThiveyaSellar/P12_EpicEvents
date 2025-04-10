@@ -1,27 +1,13 @@
-import click, jwt, os
-from models import User, Team, Event, Contract, Client
+import jwt, os
+from models import User
 from argon2 import PasswordHasher
 from datetime import datetime, timedelta
 from sqlalchemy.exc import NoResultFound
 
 from utils.token_utils import  create_netrc_file, get_netrc_path, \
-    get_tokens_from_netrc, update_tokens_in_netrc, get_user_from_access_token, \
-    generate_tokens, is_token_expired
+    update_tokens_in_netrc
 
-class LoginView:
-
-    @staticmethod
-    def print_password_error():
-        click.echo("Mot de passe incorrect.")
-
-    @staticmethod
-    def print_welcome_message(user):
-        click.echo(f"Connexion réussie.")
-        click.echo(f"Bienvenue {user.first_name} {user.last_name}!")
-
-    @staticmethod
-    def print_user_not_found():
-        click.echo("Utilisateur introuvable.")
+from views.LoginView import LoginView
 
 class LoginForm:
 
@@ -31,61 +17,55 @@ class LoginForm:
 
     def check_email_format(self):
         pass
-        # ?
 
 class LoginController:
 
+    def check_user_mail(self, session, email):
+        return session.query(User).filter_by(email_address=email).one()
+
+    def define_token(self, user, SECRET_KEY, time):
+        payload = {
+            "user_id": user.id,
+            "email": user.email_address,
+            "role": user.team.name,
+            "exp": datetime.now() + timedelta(hours=time)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        return token
+
+    def write_in_netrc(self, access_token, refresh_token):
+        netrc_path = get_netrc_path()
+        machine = "127.0.0.1"
+        if not os.path.exists(netrc_path):
+            create_netrc_file(machine, access_token, refresh_token,
+                              netrc_path)
+        else:
+            update_tokens_in_netrc(machine, access_token, refresh_token,
+                                   netrc_path)
+
+    def verify_password(self, ph, user_password, password):
+        try:
+            return ph.verify(user_password, password)
+        except:
+            return False
+
     def login(self, email, password, session, SECRET_KEY):
         loginView = LoginView()
+        ph = PasswordHasher()
 
         try:
-            # Vérification si le mail de l'utilisateur existe
-            user = session.query(User).filter_by(email_address=email).one()
-
-            # Permet d'hacher le mdp en version sécurisée et illisible
-            # Permet de comparer avec un mdp haché stocké en base de données
-            ph = PasswordHasher()
-            try:
-                ph.verify(user.password, password)
-            except:
-                # affichage
-                LoginView.show_password_error()
+            user = self.check_user_mail(session, email)
+            if not self.verify_password(ph, user.password, password):
+                loginView.show_password_error()
                 return
 
-            # Génération des jetons d'accès et de rafraichissement JWT
-            payload = {
-                "user_id": user.id,
-                "email": user.email_address,
-                "role": user.team.name,
-                "exp": datetime.now() + timedelta(hours=1)
-                # Expiration dans 1h
-            }
-            access_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+            access_token = self.define_token(user, SECRET_KEY, 1)
+            refresh_token = self.define_token(user, SECRET_KEY, 3)
 
-            payload = {
-                "user_id": user.id,
-                "email": user.email_address,
-                "role": user.team.name,
-                "exp": datetime.now() + timedelta(hours=3)
-            }
-            refresh_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-
-            # Stocker le jeton dans le fichier .netrc
-            # Définir le chemin du fichier .netrc dans le dossier utilisateur Windows
-
-            # Enregistrer le refresh token dans la base de données
             user.token = refresh_token
             session.commit()
 
-            # Données à écrire dans .netrc
-            netrc_path = get_netrc_path()
-            machine = "127.0.0.1"
-            if not os.path.exists(netrc_path):
-                create_netrc_file(machine, access_token, refresh_token,
-                                  netrc_path)
-            else:
-                update_tokens_in_netrc(machine, access_token, refresh_token,
-                                       netrc_path)
+            self.write_in_netrc(access_token, refresh_token)
 
             loginView.print_welcome_message(user)
 

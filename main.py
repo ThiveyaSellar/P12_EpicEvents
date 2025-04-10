@@ -1,17 +1,16 @@
 import os, sys, click, jwt
 
 # Ajouter le répertoire racine au sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 
 from utils.token_utils import  create_netrc_file, get_netrc_path, \
     get_tokens_from_netrc, update_tokens_in_netrc, get_user_from_access_token, \
     generate_tokens, is_token_expired
 from models import User, Team, Event, Contract, Client
 
-from MenuController import MenuController
-from LoginController import LoginController
-from RegisterController import RegisterController
-# from views.MenuView import MenuView
+from controller.MenuController import MenuController
+from controller.LoginController import LoginController
+from controller.RegisterController import RegisterController
 
 from settings import Settings
 
