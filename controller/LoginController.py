@@ -9,15 +9,6 @@ from utils.token_utils import  create_netrc_file, get_netrc_path, \
 
 from views.LoginView import LoginView
 
-class LoginForm:
-
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
-
-    def check_email_format(self):
-        pass
-
 class LoginController:
 
     def check_user_mail(self, session, email):
@@ -55,19 +46,18 @@ class LoginController:
 
         try:
             user = self.check_user_mail(session, email)
-            if not self.verify_password(ph, user.password, password):
-                loginView.show_password_error()
-                return
-
-            access_token = self.define_token(user, SECRET_KEY, 1)
-            refresh_token = self.define_token(user, SECRET_KEY, 3)
-
-            user.token = refresh_token
-            session.commit()
-
-            self.write_in_netrc(access_token, refresh_token)
-
-            loginView.print_welcome_message(user)
-
         except NoResultFound:
-            LoginView.print_user_not_found()
+            loginView.print_user_not_found()
+
+        if not self.verify_password(ph, user.password, password):
+            loginView.show_password_error()
+            return
+
+        access_token = self.define_token(user, SECRET_KEY, 1)
+        refresh_token = self.define_token(user, SECRET_KEY, 3)
+
+        user.token = refresh_token
+        session.commit()
+
+        self.write_in_netrc(access_token, refresh_token)
+        loginView.print_welcome_message(user)

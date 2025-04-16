@@ -8,8 +8,7 @@ class LoginView:
 
     @staticmethod
     def print_welcome_message(user):
-        click.echo(f"Connexion réussie.")
-        click.echo(f"Bienvenue {user.first_name} {user.last_name}!")
+        click.echo(f"Connexion réussie.\nBienvenue {user.first_name} {user.last_name}!")
 
     @staticmethod
     def print_user_not_found():

@@ -3,9 +3,7 @@ import os, sys, click, jwt
 # Ajouter le répertoire racine au sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 
-from utils.token_utils import  create_netrc_file, get_netrc_path, \
-    get_tokens_from_netrc, update_tokens_in_netrc, get_user_from_access_token, \
-    generate_tokens, is_token_expired
+from utils.token_utils import checking_user_connection
 from models import User, Team, Event, Contract, Client
 
 from controller.MenuController import MenuController
@@ -17,7 +15,6 @@ from settings import Settings
 settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
-
 
 @click.group()
 def cli():
@@ -61,31 +58,13 @@ def show_events():
     for event in events:
         click.echo(f"{event.name} {event.end_date}")
 
-
 def main():
 
     menu_controller = MenuController()
-    machine = "127.0.0.1"
-    netrc_path = get_netrc_path()
-    connected = False
-    access_token, refresh_token = get_tokens_from_netrc(machine, netrc_path)
+    connected, user = checking_user_connection(session, SECRET_KEY)
 
-    if access_token and refresh_token:
-        # Récupérer les informations de l'utilisateur dans le jeton d'accès
-        user = get_user_from_access_token(access_token, SECRET_KEY, session)
-        if is_token_expired(access_token):
-            if is_token_expired(refresh_token):
-                connected = False
-            else:
-                # Générer un nouveau access token
-                access_token, refresh_token = generate_tokens(user, SECRET_KEY)
-                update_tokens_in_netrc(
-                    machine, access_token, refresh_token, netrc_path
-                )
-                connected = True
     if not connected:
         menu_controller.create_login_menu(cli)
-
     menu_controller.create_main_menu(user, cli)
 
 if __name__ == "__main__":

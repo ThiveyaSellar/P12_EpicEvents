@@ -161,3 +161,23 @@ def get_user_from_access_token(access_token, SECRET_KEY, session):
         click.echo("Token invalide.")
         return None
 
+def checking_user_connection(session, SECRET_KEY):
+
+    machine = "127.0.0.1"
+    netrc_path = get_netrc_path()
+    connected = False
+    access_token, refresh_token = get_tokens_from_netrc(machine, netrc_path)
+
+    if access_token and refresh_token:
+        # Récupérer les informations de l'utilisateur dans le jeton d'accès
+        user = get_user_from_access_token(access_token, SECRET_KEY, session)
+        if is_token_expired(access_token):
+            if is_token_expired(refresh_token):
+                connected = False
+            else:
+                # Générer un nouveau access token
+                access_token, refresh_token = generate_tokens(user, SECRET_KEY)
+                update_tokens_in_netrc(machine, access_token, refresh_token, netrc_path)
+                connected = True
+        return connected, user
+    return connected, None

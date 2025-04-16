@@ -11,6 +11,10 @@ class MenuView:
         click.echo("Commande invalide, veuillez réessayer.")
 
     @staticmethod
+    def msg_user_none():
+        click.echo("Utilisateur inconnu, fin du programme!")
+
+    @staticmethod
     def print_login_menu():
         click.echo("\n------------- Main -------------")
         click.echo("Please enter a command :")
@@ -34,4 +38,4 @@ class MenuView:
         click.echo(f"------------- Menu {team} -------------")
         click.echo("1- show-clients")
         click.echo("2- show-events")
-        click.echo("4- logout")
+        click.echo("3- logout")
