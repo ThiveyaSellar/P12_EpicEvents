@@ -1,8 +1,4 @@
-import click
 from views.MenuView import MenuView
-
-from controller.LoginController import LoginView
-
 
 class MenuController:
 
@@ -21,8 +17,15 @@ class MenuController:
                 if user is None:
                     self.view.msg_user_none()
                 team = user.team.name
+                if team == "Commercial":
+                    print("Commercial")
+                elif team == "Gestion":
+                    print("Gestion")
+                elif team == "Support":
+                    print("Support")
+                self.view.show_support_menu()
                 # Print menu and get command from user input
-                self.view.show_main_menu(user, team)
+                # self.view.show_main_menu(user, team)
                 cmd = self.view.ask_cmd_input()
                 if cmd.lower() in ["exit", "quit"]:
                     break

@@ -34,8 +34,23 @@ class MenuView:
             MenuView.error_message_invalid_cmd()
 
     @staticmethod
+    def show_support_menu():
+        click.echo(f"------------- Menu Support -------------")
+        click.echo("1- show-support-events")
+        click.echo("2- update-attributed-events")
+        click.echo("3- show-clients")
+        click.echo("4- show-contracts")
+        click.echo("5- show-events")
+        click.echo("6- logout")
+
+
+    @staticmethod
     def show_main_menu(user, team):
         click.echo(f"------------- Menu {team} -------------")
         click.echo("1- show-clients")
         click.echo("2- show-events")
         click.echo("3- logout")
+
+    @staticmethod
+    def print_error_message(message):
+        click.echo(message)

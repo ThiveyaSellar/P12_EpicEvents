@@ -4,8 +4,7 @@ from argon2 import PasswordHasher
 from datetime import datetime, timedelta
 from sqlalchemy.exc import NoResultFound
 
-from utils.token_utils import  create_netrc_file, get_netrc_path, \
-    update_tokens_in_netrc
+from utils.TokenManagement import TokenManagement
 
 from views.LoginView import LoginView
 
@@ -25,13 +24,13 @@ class LoginController:
         return token
 
     def write_in_netrc(self, access_token, refresh_token):
-        netrc_path = get_netrc_path()
+        netrc_path = TokenManagement.get_netrc_path()
         machine = "127.0.0.1"
         if not os.path.exists(netrc_path):
-            create_netrc_file(machine, access_token, refresh_token,
+            TokenManagement.create_netrc_file(machine, access_token, refresh_token,
                               netrc_path)
         else:
-            update_tokens_in_netrc(machine, access_token, refresh_token,
+            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
 
     def verify_password(self, ph, user_password, password):
