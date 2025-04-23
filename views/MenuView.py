@@ -37,7 +37,7 @@ class MenuView:
     def show_support_menu():
         click.echo(f"------------- Menu Support -------------")
         click.echo("1- show-support-events")
-        click.echo("2- update-attributed-events")
+        click.echo("2- update-support-event")
         click.echo("3- show-clients")
         click.echo("4- show-contracts")
         click.echo("5- show-events")

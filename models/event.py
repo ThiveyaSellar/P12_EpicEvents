@@ -27,3 +27,12 @@ class Event(Base):
     client: Mapped["Client"] = relationship(back_populates="events")
     support: Mapped["User"] = relationship(back_populates="events")
     contract: Mapped["Contract"] = relationship(back_populates="event")
+
+    def __str__(self):
+        return (
+            f"Event: {self.name}\n"
+            f"Date: {self.start_date} → {self.end_date}\n"
+            f"Address: {self.address}\n"
+            f"Attendees: {self.nb_attendees}\n"
+            f"Client: {self.client.company if self.client else 'N/A'}\n"
+        )

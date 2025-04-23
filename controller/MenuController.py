@@ -18,12 +18,11 @@ class MenuController:
                     self.view.msg_user_none()
                 team = user.team.name
                 if team == "Commercial":
-                    print("Commercial")
+                    pass
                 elif team == "Gestion":
-                    print("Gestion")
+                    pass
                 elif team == "Support":
-                    print("Support")
-                self.view.show_support_menu()
+                    self.view.show_support_menu()
                 # Print menu and get command from user input
                 # self.view.show_main_menu(user, team)
                 cmd = self.view.ask_cmd_input()

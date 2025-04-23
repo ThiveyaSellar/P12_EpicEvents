@@ -59,8 +59,13 @@ def show_events():
 
 @cli.command()
 def show_support_events():
-    controller = EventController()
-    controller.display_support_events(session, SECRET_KEY)
+    controller = EventController(session, SECRET_KEY)
+    controller.display_support_events()
+
+@cli.command()
+def update_support_event():
+    controller = EventController(session, SECRET_KEY)
+    controller.update_support_events()
 
 @cli.command()
 def show_contracts():
