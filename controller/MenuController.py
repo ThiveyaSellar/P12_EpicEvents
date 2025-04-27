@@ -18,7 +18,7 @@ class MenuController:
                     self.view.msg_user_none()
                 team = user.team.name
                 if team == "Commercial":
-                    pass
+                    self.view.show_sales_menu()
                 elif team == "Gestion":
                     pass
                 elif team == "Support":

@@ -35,7 +35,7 @@ class MenuView:
 
     @staticmethod
     def show_support_menu():
-        click.echo(f"------------- Menu Support -------------")
+        click.echo(f"------------- Support menu -------------")
         click.echo("1- show-support-events")
         click.echo("2- update-support-event")
         click.echo("3- show-clients")
@@ -43,6 +43,18 @@ class MenuView:
         click.echo("5- show-events")
         click.echo("6- logout")
 
+    @staticmethod
+    def show_sales_menu():
+        click.echo(f"------------- Sales menu -------------")
+        click.echo("1- create-client")
+        click.echo("2- update-client")
+        click.echo("3- show-specific-contracts")
+        click.echo("4- update-my-contracts")
+        click.echo("5- create-event-for-my-client")
+        click.echo("6- show-clients")
+        click.echo("7- show-contracts")
+        click.echo("8- show-events")
+        click.echo("9- logout")
 
     @staticmethod
     def show_main_menu(user, team):

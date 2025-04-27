@@ -60,3 +60,17 @@ class LoginController:
 
         self.write_in_netrc(access_token, refresh_token)
         loginView.print_welcome_message(user)
+
+    def logout(self):
+        # Demander confirmation de déconnexion
+        loginView = LoginView()
+        logging_out = loginView.get_logout_confirmation()
+        machine = "127.0.0.1"
+        if logging_out:
+            netrc_path = TokenManagement.get_netrc_path()
+            TokenManagement.update_tokens_in_netrc(machine,"","",netrc_path)
+            loginView.print_logged_out_message()
+            exit()
+        else:
+            loginView.print_staying_logged_message()
+

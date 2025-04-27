@@ -9,7 +9,7 @@ class EventView:
 
         headers = (
             "Name", "Start Date", "End Date", "Address", "Attendees",
-            "Client", "Support", "Contract", "Notes"
+            "Client", "Support", "Contract id", "Notes"
         )
         click.echo(row_format.format(*headers))
         click.echo(
@@ -23,7 +23,7 @@ class EventView:
                 event.address,
                 event.nb_attendees,
                 event.client.company if event.client else "N/A",
-                event.support.first_name if event.support else "N/A",
+                f"{event.support.first_name} {event.support.last_name}" if event.support else "N/A",
                 event.contract.id if event.contract else "N/A",
                 event.notes
             ))

@@ -30,6 +30,14 @@ class TokenManagement:
             with open(netrc_path, "r") as file:
                 lines = file.readlines()
 
+        access_token_line = ""
+        refresh_token_line = ""
+        # Préparer les lignes à écrire
+        if access_token != "":
+            access_token_line = f"  access-token {access_token}\n"
+        if refresh_token != "":
+            refresh_token_line= f"  refresh-token {refresh_token}\n"
+
         # Chercher la section de la machine
         machine_index = None
         for i, line in enumerate(lines):
@@ -44,10 +52,10 @@ class TokenManagement:
 
             while i < len(lines) and not lines[i].startswith("machine "):
                 if lines[i].strip().startswith("access-token"):
-                    lines[i] = f"  access-token {access_token}\n"
+                    lines[i] = access_token_line
                     access_updated = True
                 elif lines[i].strip().startswith("refresh-token"):
-                    lines[i] = f"  refresh-token {refresh_token}\n"
+                    lines[i] = refresh_token_line
                     refresh_updated = True
                 i += 1
 
@@ -178,19 +186,31 @@ class TokenManagement:
         connected = False
         access_token, refresh_token = TokenManagement.get_tokens_from_netrc(machine, netrc_path)
 
-        if access_token and refresh_token:
+        # S'il n'y a pas de token, pas connecté et pas d'utilisateur
+        if not access_token or not refresh_token:
+            return connected, None
+
+        # S'il le token d'accès n'est pas expiré l'utilisateur est connecté
+        # En récupérant ses données dans le token
+        if not TokenManagement.is_token_expired(access_token):
             # Récupérer les informations de l'utilisateur dans le jeton d'accès
             user = TokenManagement.get_user_from_access_token(access_token, SECRET_KEY, session)
-            if TokenManagement.is_token_expired(access_token):
-                if TokenManagement.is_token_expired(refresh_token):
-                    connected = False
-                else:
-                    # Générer un nouveau access token
-                    access_token, refresh_token = TokenManagement.generate_tokens(user, SECRET_KEY)
-                    TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token, netrc_path)
-                    connected = True
+            connected = True
             return connected, user
-        return connected, None
+
+        # Si le token de rafraichissement n'est pas expiré, générer de nouveaux tokens
+        if not TokenManagement.is_token_expired(refresh_token):
+            user = TokenManagement.get_user_from_access_token(
+                refresh_token, SECRET_KEY, session
+            )
+            # Générer un nouveau access token
+            access_token, refresh_token = TokenManagement.generate_tokens(user, SECRET_KEY)
+            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token, netrc_path)
+            connected = True
+            return connected, user
+
+        return False, None
+
 
     @staticmethod
     def get_connected_user(session, SECRET_KEY):
@@ -204,3 +224,5 @@ class TokenManagement:
         user = TokenManagement.get_user_from_access_token(access_token,
                                                           SECRET_KEY, session)
         return user
+
+

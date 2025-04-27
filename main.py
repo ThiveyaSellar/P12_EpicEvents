@@ -48,14 +48,28 @@ def register(email, password, password2, first_name, last_name, phone, team):
     controller.register(email, password, password2, first_name, last_name, phone, team)
 
 @cli.command()
+def logout():
+    controller = LoginController()
+    controller.logout()
+
+@cli.command()
 def show_clients():
-    controller = ClientController()
+    controller = ClientController(session, SECRET_KEY)
     controller.display_all_clients(session)
 
 @cli.command()
 def show_events():
-    controller = EventController()
+    controller = EventController(session, SECRET_KEY)
     controller.display_all_events(session)
+
+@cli.command()
+def show_contracts():
+    controller = ContractController(session, SECRET_KEY)
+    controller.display_all_contracts(session)
+
+# --------------------------------------------------------
+    # Support
+# --------------------------------------------------------
 
 @cli.command()
 def show_support_events():
@@ -67,10 +81,20 @@ def update_support_event():
     controller = EventController(session, SECRET_KEY)
     controller.update_support_events()
 
+# --------------------------------------------------------
+    # Commercial
+# --------------------------------------------------------
+
 @cli.command()
-def show_contracts():
-    controller = ContractController()
-    controller.display_all_contracts(session)
+def create_client():
+    controller = ClientController(session, SECRET_KEY)
+    controller.create_client()
+
+@cli.command()
+def update_client():
+    controller = ClientController(session, SECRET_KEY)
+    controller.update_client()
+
 
 def main():
 
@@ -79,6 +103,7 @@ def main():
 
     if not connected:
         menu_controller.create_login_menu(cli)
+        user = TokenManagement.get_connected_user(session, SECRET_KEY)
     menu_controller.create_main_menu(user, cli)
 
 if __name__ == "__main__":
