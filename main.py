@@ -98,13 +98,22 @@ def update_client():
 
 def main():
 
+    print("A")
     menu_controller = MenuController()
+    print("B")
+    # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
     connected, user = TokenManagement.checking_user_connection(session, SECRET_KEY)
+    print("C")
 
     if not connected:
+        print("D")
         menu_controller.create_login_menu(cli)
+        print("E")
         user = TokenManagement.get_connected_user(session, SECRET_KEY)
+        print("F")
+
     menu_controller.create_main_menu(user, cli)
+    print("G")
 
 if __name__ == "__main__":
     main()

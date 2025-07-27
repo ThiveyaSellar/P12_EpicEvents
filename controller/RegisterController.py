@@ -1,7 +1,11 @@
+import jwt, os
 from argon2 import PasswordHasher
 
 from models import User, Team
 from views.RegisterView import RegisterView
+from datetime import datetime, timedelta
+
+from utils.TokenManagement import TokenManagement
 
 from settings import Settings
 
@@ -18,6 +22,16 @@ class RegisterController:
     def __hash_passwords(self, password):
         ph = PasswordHasher()
         return ph.hash(password)
+
+    def write_in_netrc(self, access_token, refresh_token):
+        netrc_path = TokenManagement.get_netrc_path()
+        machine = "127.0.0.1"
+        if not os.path.exists(netrc_path):
+            TokenManagement.create_netrc_file(machine, access_token, refresh_token,
+                              netrc_path)
+        else:
+            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
+                                   netrc_path)
 
     def register(self, email, password, password2, first_name, last_name, phone, team):
         registerView = RegisterView()

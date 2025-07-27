@@ -181,35 +181,39 @@ class TokenManagement:
     @staticmethod
     def checking_user_connection(session, SECRET_KEY):
 
+        # Nom du serveur ou domaine
         machine = "127.0.0.1"
+        # Chemin du fichier .netrc
         netrc_path = TokenManagement.get_netrc_path()
         connected = False
+        # Chercher les tokens dans le fichier
         access_token, refresh_token = TokenManagement.get_tokens_from_netrc(machine, netrc_path)
 
-        # S'il n'y a pas de token, pas connecté et pas d'utilisateur
+        # Si pas de token, pas connecté et pas d'utilisateur
         if not access_token or not refresh_token:
             return connected, None
 
-        # S'il le token d'accès n'est pas expiré l'utilisateur est connecté
-        # En récupérant ses données dans le token
+        # Si token d'accès valide, utilisateur connecté
+        # Récupération des données utilisateurs dans le token
         if not TokenManagement.is_token_expired(access_token):
             # Récupérer les informations de l'utilisateur dans le jeton d'accès
             user = TokenManagement.get_user_from_access_token(access_token, SECRET_KEY, session)
             connected = True
             return connected, user
 
-        # Si le token de rafraichissement n'est pas expiré, générer de nouveaux tokens
+        # Si token de rafraichissement valide, générer de nouveaux tokens
         if not TokenManagement.is_token_expired(refresh_token):
+            # Récupération des données utilisateurs dans le token
             user = TokenManagement.get_user_from_access_token(
                 refresh_token, SECRET_KEY, session
             )
-            # Générer un nouveau access token
+            # Générer de nouveaux tokens
             access_token, refresh_token = TokenManagement.generate_tokens(user, SECRET_KEY)
             TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token, netrc_path)
             connected = True
             return connected, user
 
-        return False, None
+        return connected, None
 
 
     @staticmethod

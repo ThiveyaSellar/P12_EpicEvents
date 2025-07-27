@@ -12,6 +12,14 @@ class MenuController:
         cli.main(cmd.split(), standalone_mode=False)
 
     def create_main_menu(self, user, cli):
+
+        # Permissions par équipe
+        permissions = {
+            "Commercial": ["create_client", "list_clients"],
+            "Support": ["create_ticket", "list_tickets"],
+            "Gestion": ["generate_report", "view_stats"]
+        }
+
         while True:
             try:
                 if user is None:

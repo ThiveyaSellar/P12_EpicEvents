@@ -11,6 +11,7 @@ from views.LoginView import LoginView
 class LoginController:
 
     def check_user_mail(self, session, email):
+        # Récupération utilisateur associé au mail
         return session.query(User).filter_by(email_address=email).one()
 
     def define_token(self, user, SECRET_KEY, time):
@@ -43,21 +44,28 @@ class LoginController:
         loginView = LoginView()
         ph = PasswordHasher()
 
+        # Vérifier l'email utilisé pour la connexion
+        # Récupérer l'utilisateur associé
         try:
             user = self.check_user_mail(session, email)
         except NoResultFound:
             loginView.print_user_not_found()
 
+        # Vérifier le mot de passe saisi
+        # avec le mot de passe de l'utilisateur récupéré
         if not self.verify_password(ph, user.password, password):
             loginView.show_password_error()
             return
 
+        # Générer les tokens
         access_token = self.define_token(user, SECRET_KEY, 1)
         refresh_token = self.define_token(user, SECRET_KEY, 3)
 
+        # Sauvegarder le token de rafraichissement dans la base de données
         user.token = refresh_token
         session.commit()
 
+        # Ecrire les tokens dans le fichier netrc
         self.write_in_netrc(access_token, refresh_token)
         loginView.print_welcome_message(user)
 
