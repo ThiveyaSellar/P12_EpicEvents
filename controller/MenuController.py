@@ -14,10 +14,15 @@ class MenuController:
     def create_main_menu(self, user, cli):
 
         # Permissions par équipe
+        general_permissions = ["show_clients","show_contracts","show_events", "logout"]
+        sales_permissions = general_permissions + ["create_client", "list_clients"]
+        support_permissions = general_permissions + ["update_support_event"]
+        management_permissions = general_permissions + [""]
+
         permissions = {
-            "Commercial": ["create_client", "list_clients"],
-            "Support": ["create_ticket", "list_tickets"],
-            "Gestion": ["generate_report", "view_stats"]
+            "Commercial": sales_permissions,
+            "Support": support_permissions,
+            "Gestion": management_permissions
         }
 
         while True:
@@ -34,9 +39,15 @@ class MenuController:
                 # Print menu and get command from user input
                 # self.view.show_main_menu(user, team)
                 cmd = self.view.ask_cmd_input()
-                if cmd.lower() in ["exit", "quit"]:
-                    break
-                cli.main(cmd.split(), standalone_mode=False)
+                # Vérifie que la commande est autorisée
+                cmd_parts = cmd.split()
+                main_cmd = cmd_parts[0] if cmd_parts else ""
+
+                if main_cmd in permissions.get(team, []):
+                    cli.main(cmd_parts, standalone_mode=False)
+                else:
+                    self.view.print_error_message(
+                        f"Commande non autorisée pour l’équipe {team}")
             except Exception as e:
                 self.view.print_error_message(e)
                 break
