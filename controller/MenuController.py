@@ -14,10 +14,29 @@ class MenuController:
     def create_main_menu(self, user, cli):
 
         # Permissions par équipe
-        general_permissions = ["show_clients","show_contracts","show_events", "logout"]
-        sales_permissions = general_permissions + ["create_client", "list_clients"]
-        support_permissions = general_permissions + ["update_support_event"]
-        management_permissions = general_permissions + [""]
+        all_permissions = [
+            "show_clients",
+            "show_contracts",
+            "show_events",
+            "logout"
+        ]
+
+        sales_permissions = all_permissions + \
+                            [
+                                "create_client",
+                                "update_client",
+                                "show_specific_contracts",
+                                "update_my_contracts",
+                                "create_event_for_my_client"
+                            ]
+
+        support_permissions = all_permissions + \
+                              [
+                                  "update_support_event",
+                                  "show_support_events"
+                              ]
+        
+        management_permissions = all_permissions + [""]
 
         permissions = {
             "Commercial": sales_permissions,
