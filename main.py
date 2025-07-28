@@ -19,17 +19,18 @@ settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
 
-"""def email_exists_in_db(session, email):
-    session.query(Team).filter_by(name=team).one().id
-    """
+def email_exists_in_db(session, email):
+    user = session.query(User).filter_by(email_address=email).first()
+    return user is not None
+
 def validate_email(ctx, param, value):
     email = value
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         raise click.BadParameter("L'email n'est pas valide.")
-    """ # Vérifier dans le cas d'une inscription si le mail existe déjà ou non
+    # Vérifier dans le cas d'une inscription si le mail existe déjà ou non
     if ctx.command.name == "register":
         if email_exists_in_db(session, email):
-            raise click.BadParameter("Cet email est déjà utilisé.")"""
+            raise click.BadParameter("Cet email est déjà utilisé.")
     return email
 
 def validate_phone(ctx, param, value):
