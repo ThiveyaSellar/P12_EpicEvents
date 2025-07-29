@@ -13,7 +13,6 @@ settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
 
-
 class RegisterController:
 
     def validate_password(self, password, password2):

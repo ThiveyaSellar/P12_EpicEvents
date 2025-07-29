@@ -180,7 +180,6 @@ class TokenManagement:
 
     @staticmethod
     def checking_user_connection(session, SECRET_KEY):
-
         # Nom du serveur ou domaine
         machine = "127.0.0.1"
         # Chemin du fichier .netrc

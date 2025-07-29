@@ -51,6 +51,7 @@ class Settings:
     def get_secret_key(self):
         self.secret_key = self.config['jwt']['SECRET_KEY']
 
+
 class DatabaseConfig:
 
     def __init__(self, config):

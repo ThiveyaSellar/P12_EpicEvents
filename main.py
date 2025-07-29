@@ -145,6 +145,9 @@ def main():
         user = TokenManagement.get_connected_user(session, SECRET_KEY)
         print("F")
 
+    if user is None:
+        print("Utilisateur inconnu, fin du programme !!")
+        return  # ou exit()
     menu_controller.create_main_menu(user, cli)
     print("G")
 
