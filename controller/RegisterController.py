@@ -9,9 +9,9 @@ from utils.TokenManagement import TokenManagement
 
 from settings import Settings
 
-settings = Settings()
+"""settings = Settings()
 session = settings.session
-SECRET_KEY = settings.secret_key
+SECRET_KEY = settings.secret_key"""
 
 class RegisterController:
 
@@ -32,7 +32,7 @@ class RegisterController:
             TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
 
-    def register(self, email, password, password2, first_name, last_name, phone, team):
+    def register(self, email, password, password2, first_name, last_name, phone, team, session, SECRET_KEY):
         registerView = RegisterView()
 
         if not self.validate_password(password, password2):
@@ -43,14 +43,14 @@ class RegisterController:
         hashed_password = self.__hash_passwords(password)
 
         # Récupérer l'id de l'équipe
-        team_id = session.query(Team).filter_by(name=team).one().id
+        team_id = session.query(Team).filter_by(name=team).first().id
 
         # Création de l'utilisateur
         new_user = User(
             password=hashed_password,
             first_name=first_name,
             last_name=last_name,
-            email_address=email,
+            email_address=email.strip().lower(),
             phone=phone,
             team_id=team_id
         )
@@ -60,3 +60,5 @@ class RegisterController:
         session.commit()
 
         registerView.success_message(first_name, last_name)
+        print("Utilisateur enregistré :", email)
+        print([u.email_address for u in session.query(User).all()])

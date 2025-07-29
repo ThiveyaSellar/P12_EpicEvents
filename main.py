@@ -78,7 +78,7 @@ def login(email, password):
               prompt="Équipe", help="Votre équipe")
 def register(email, password, password2, first_name, last_name, phone, team):
     controller = RegisterController()
-    controller.register(email, password, password2, first_name, last_name, phone, team)
+    controller.register(email, password, password2, first_name, last_name, phone, team, session, SECRET_KEY)
 
 @cli.command()
 def logout():
@@ -129,7 +129,7 @@ def update_client():
     controller.update_client()
 
 
-def main():
+"""def main():
 
     print("A")
     menu_controller = MenuController()
@@ -142,14 +142,40 @@ def main():
         print("D")
         menu_controller.create_login_menu(cli)
         print("E")
+        # menu_controller.create_login_menu(cli)
         user = TokenManagement.get_connected_user(session, SECRET_KEY)
         print("F")
 
     if user is None:
-        print("Utilisateur inconnu, fin du programme !!")
-        return  # ou exit()
+        print("USer is None")
+        menu_controller.create_login_menu(cli)
     menu_controller.create_main_menu(user, cli)
-    print("G")
+    print("G")"""
+
+def main():
+    print("URL base SQL :", session.bind.url)
+    menu_controller = MenuController()
+    # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
+    connected, user = TokenManagement.checking_user_connection(session,
+                                                               SECRET_KEY)
+    while not connected:
+        # Menu avec soit inscription soit connexion
+        # Execution des commandes login et register
+        menu_controller.create_login_menu(cli)
+        # Vérification de l'execution de login
+
+        # Vérifier si l'utilisateur est connecté (s'il s'est loggé)
+        connected, user = TokenManagement.checking_user_connection(session,
+                                                                   SECRET_KEY)
+        if user is not None:
+            print("-------------------------")
+            print(vars(user))
+            print("-------------------------")
+        else:
+            print(user)
+            print("user vaut None")
+
+    menu_controller.create_main_menu(user, cli)
 
 if __name__ == "__main__":
     main()

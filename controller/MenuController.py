@@ -12,7 +12,7 @@ class MenuController:
         cli.main(cmd.split(), standalone_mode=False)
 
     def create_main_menu(self, user, cli):
-
+        print("Dans la fonction create_main_menu")
         # Permissions par équipe
         all_permissions = [
             "show_clients",

@@ -12,6 +12,13 @@ class LoginController:
 
     def check_user_mail(self, session, email):
         # Récupération utilisateur associé au mail
+        email = email.strip().lower()
+        print("Email recherché :", repr(email))
+
+        users = session.query(User).all()
+        print("Emails en base :")
+        for u in users:
+            print("-", repr(u.email_address))
         return session.query(User).filter_by(email_address=email).one()
 
     def define_token(self, user, SECRET_KEY, time):
@@ -41,16 +48,17 @@ class LoginController:
             return False
 
     def login(self, email, password, session, SECRET_KEY):
+        session.expire_all()
         loginView = LoginView()
         ph = PasswordHasher()
 
         # Vérifier l'email utilisé pour la connexion
         # Récupérer l'utilisateur associé
         try:
-            user = self.check_user_mail(session, email)
+            user = self.check_user_mail(session, email.strip().lower())
         except NoResultFound:
             loginView.print_user_not_found()
-
+            return
         # Vérifier le mot de passe saisi
         # avec le mot de passe de l'utilisateur récupéré
         if not self.verify_password(ph, user.password, password):
@@ -68,6 +76,7 @@ class LoginController:
         # Ecrire les tokens dans le fichier netrc
         self.write_in_netrc(access_token, refresh_token)
         loginView.print_welcome_message(user)
+
 
     def logout(self):
         # Demander confirmation de déconnexion
