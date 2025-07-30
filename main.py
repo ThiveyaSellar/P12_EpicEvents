@@ -134,29 +134,6 @@ def exit():
     controller.exit_program()
     sys.exit()
 
-"""def main():
-
-    print("A")
-    menu_controller = MenuController()
-    print("B")
-    # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
-    connected, user = TokenManagement.checking_user_connection(session, SECRET_KEY)
-    print("C")
-
-    if not connected:
-        print("D")
-        menu_controller.create_login_menu(cli)
-        print("E")
-        # menu_controller.create_login_menu(cli)
-        user = TokenManagement.get_connected_user(session, SECRET_KEY)
-        print("F")
-
-    if user is None:
-        print("USer is None")
-        menu_controller.create_login_menu(cli)
-    menu_controller.create_main_menu(user, cli)
-    print("G")"""
-
 def main():
     menu_controller = MenuController()
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
@@ -172,7 +149,7 @@ def main():
         connected, user = TokenManagement.checking_user_connection(session,
                                                                    SECRET_KEY)
 
-    menu_controller.create_main_menu(user, cli)
+    menu_controller.create_main_menu(user, cli, session, SECRET_KEY)
 
 if __name__ == "__main__":
     main()

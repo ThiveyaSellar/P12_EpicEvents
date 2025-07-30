@@ -21,7 +21,7 @@ class LoginController:
             "user_id": user.id,
             "email": user.email_address,
             "role": user.team.name,
-            "exp": datetime.now() + timedelta(hours=time)
+            "exp": datetime.now() + timedelta(minutes=time)
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
         return token

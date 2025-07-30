@@ -1,5 +1,6 @@
 from views.MenuView import MenuView
 from utils.permissions import is_authorized, PERMISSIONS
+from utils.TokenManagement import TokenManagement
 
 
 class MenuController:
@@ -13,7 +14,7 @@ class MenuController:
             exit()
         cli.main(cmd.split(), standalone_mode=False)
 
-    def create_main_menu(self, user, cli):
+    def create_main_menu(self, user, cli, session, SECRET_KEY):
         while True:
             try:
                 if user is None:
@@ -25,6 +26,15 @@ class MenuController:
                     pass
                 elif team == "Support":
                     self.view.show_support_menu()
+
+                # Vérifier si l'utilisateur est toujours connecté
+                connected, user = TokenManagement.checking_user_connection(
+                    session,
+                    SECRET_KEY
+                )
+                if not connected:
+                    print("Veuillez vous reconnecter.")
+                    exit()
                 # Print menu and get command from user input
                 # self.view.show_main_menu(user, team)
                 cmd = self.view.ask_cmd_input()
