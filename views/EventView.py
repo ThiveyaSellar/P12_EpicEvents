@@ -5,7 +5,7 @@ class EventView:
     @staticmethod
     def show_all_events(events):
 
-        row_format = "{:<30} {:<15} {:<15} {:<30} {:<10} {:<20} {:<10} {:<10} {:<12}"
+        row_format = "{:<30} {:<12} {:<12} {:<50} {:<15} {:<20} {:<15} {:<15} {:<30}"
 
         headers = (
             "Name", "Start Date", "End Date", "Address", "Attendees",

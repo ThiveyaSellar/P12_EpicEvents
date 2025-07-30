@@ -22,7 +22,7 @@ class ClientView:
                 str(client.email_address),
                 client.phone,
                 client.company,
-                client.commercial_id
+                f"{client.commercial.first_name} {client.commercial.last_name}" if client.commercial else "N/A",
             ))
 
     @staticmethod
