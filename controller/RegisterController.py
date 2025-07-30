@@ -60,5 +60,3 @@ class RegisterController:
         session.commit()
 
         registerView.success_message(first_name, last_name)
-        print("Utilisateur enregistré :", email)
-        print([u.email_address for u in session.query(User).all()])

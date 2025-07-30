@@ -13,12 +13,7 @@ class LoginController:
     def check_user_mail(self, session, email):
         # Récupération utilisateur associé au mail
         email = email.strip().lower()
-        print("Email recherché :", repr(email))
 
-        users = session.query(User).all()
-        print("Emails en base :")
-        for u in users:
-            print("-", repr(u.email_address))
         return session.query(User).filter_by(email_address=email).one()
 
     def define_token(self, user, SECRET_KEY, time):
@@ -90,4 +85,8 @@ class LoginController:
             exit()
         else:
             loginView.print_staying_logged_message()
+
+    def exit_program(self):
+        loginView = LoginView()
+        loginView.print_exit_message()
 

@@ -66,3 +66,7 @@ class MenuView:
     @staticmethod
     def print_error_message(message):
         click.echo(message)
+
+    @staticmethod
+    def logout_message():
+        click.echo("Déconnexion. Retour au menu de connexion...")

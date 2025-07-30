@@ -1,4 +1,6 @@
 from views.MenuView import MenuView
+from utils.permissions import is_authorized, PERMISSIONS
+
 
 class MenuController:
 
@@ -12,38 +14,6 @@ class MenuController:
         cli.main(cmd.split(), standalone_mode=False)
 
     def create_main_menu(self, user, cli):
-        print("Dans la fonction create_main_menu")
-        # Permissions par équipe
-        all_permissions = [
-            "show_clients",
-            "show_contracts",
-            "show_events",
-            "logout"
-        ]
-
-        sales_permissions = all_permissions + \
-                            [
-                                "create_client",
-                                "update_client",
-                                "show_specific_contracts",
-                                "update_my_contracts",
-                                "create_event_for_my_client"
-                            ]
-
-        support_permissions = all_permissions + \
-                              [
-                                  "update_support_event",
-                                  "show_support_events"
-                              ]
-        
-        management_permissions = all_permissions + [""]
-
-        permissions = {
-            "Commercial": sales_permissions,
-            "Support": support_permissions,
-            "Gestion": management_permissions
-        }
-
         while True:
             try:
                 if user is None:
@@ -60,13 +30,18 @@ class MenuController:
                 cmd = self.view.ask_cmd_input()
                 # Vérifie que la commande est autorisée
                 cmd_parts = cmd.split()
-                main_cmd = cmd_parts[0] if cmd_parts else ""
+                command = cmd_parts[0] if cmd_parts else ""
 
-                if main_cmd in permissions.get(team, []):
+                if is_authorized(team, command, PERMISSIONS):
                     cli.main(cmd_parts, standalone_mode=False)
+                elif command == "":
+                    print("Veuillez saisir une commande.")
                 else:
                     self.view.print_error_message(
                         f"Commande non autorisée pour l’équipe {team}")
             except Exception as e:
                 self.view.print_error_message(e)
                 break
+
+    def logout(self):
+        self.view.logout_message()

@@ -128,6 +128,11 @@ def update_client():
     controller = ClientController(session, SECRET_KEY)
     controller.update_client()
 
+@cli.command()
+def exit():
+    controller = LoginController()
+    controller.exit_program()
+    sys.exit()
 
 """def main():
 
@@ -153,7 +158,6 @@ def update_client():
     print("G")"""
 
 def main():
-    print("URL base SQL :", session.bind.url)
     menu_controller = MenuController()
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
     connected, user = TokenManagement.checking_user_connection(session,
@@ -167,13 +171,6 @@ def main():
         # Vérifier si l'utilisateur est connecté (s'il s'est loggé)
         connected, user = TokenManagement.checking_user_connection(session,
                                                                    SECRET_KEY)
-        if user is not None:
-            print("-------------------------")
-            print(vars(user))
-            print("-------------------------")
-        else:
-            print(user)
-            print("user vaut None")
 
     menu_controller.create_main_menu(user, cli)
 

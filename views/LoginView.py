@@ -33,4 +33,8 @@ class LoginView:
     def print_staying_logged_message():
         click.echo("Retour au menu.")
 
+    @staticmethod
+    def print_exit_message():
+        click.echo("Fin du programme. 'python main.py' pour le relancer.")
+
 
