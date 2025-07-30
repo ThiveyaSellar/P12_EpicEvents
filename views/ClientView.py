@@ -4,9 +4,26 @@ class ClientView:
 
     @staticmethod
     def show_all_clients(clients):
-        click.echo("------------- Clients -------------")
+
+        row_format = "{:<20} {:<20} {:<35} {:<30} {:<20} {:<20}"
+
+        headers = (
+            "First Name", "Last Name", "Email", "Phone", "Company",
+            "Commercial"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo(
+            "-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
+
         for client in clients:
-            click.echo(f"{client.first_name} {client.last_name}")
+            click.echo(row_format.format(
+                client.first_name,
+                str(client.last_name),
+                str(client.email_address),
+                client.phone,
+                client.company,
+                client.commercial_id
+            ))
 
     @staticmethod
     def get_new_client_data():
