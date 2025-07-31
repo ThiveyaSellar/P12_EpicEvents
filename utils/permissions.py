@@ -19,7 +19,7 @@ sales_permissions = all_permissions + \
 support_permissions = all_permissions + \
                       [
                           "update-support-event",
-                          "show-support-events",
+                          "show-support-events"
                           # ...
                       ]
 

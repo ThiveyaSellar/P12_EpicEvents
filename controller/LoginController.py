@@ -57,7 +57,7 @@ class LoginController:
         # Vérifier le mot de passe saisi
         # avec le mot de passe de l'utilisateur récupéré
         if not self.verify_password(ph, user.password, password):
-            loginView.show_password_error()
+            loginView.print_password_error()
             return
 
         # Générer les tokens

@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 from utils.TokenManagement import TokenManagement
 from models import User, Team, Event, Contract, Client
 
+from controller.UserController import UserController
 from controller.MenuController import MenuController
 from controller.LoginController import LoginController
 from controller.RegisterController import RegisterController
@@ -78,7 +79,7 @@ def login(email, password):
               prompt="Équipe", help="Votre équipe")
 def register(email, password, password2, first_name, last_name, phone, team):
     controller = RegisterController()
-    controller.register(email, password, password2, first_name, last_name, phone, team, session, SECRET_KEY)
+    controller.register(email, password, password2, first_name, last_name, phone, team, session)
 
 @cli.command()
 def logout():
@@ -113,6 +114,23 @@ def show_support_events():
 def update_support_event():
     controller = EventController(session, SECRET_KEY)
     controller.update_support_events()
+
+@cli.command()
+@click.option("--email", prompt="Email", callback=validate_email, help="Son email")
+@click.option("--first_name", prompt="Prénom", callback=validate_name, help="Son prénom")
+@click.option("--last_name", prompt="Nom", callback=validate_name, help="Son nom")
+@click.option("--phone", prompt="Numéro de téléphone", callback=validate_phone, help="Son téléphone")
+@click.option("--team", type=click.Choice(["Commercial", "Gestion", "Support"],
+                                          case_sensitive=False),
+              prompt="Son équipe", help="Son équipe")
+def create_co_worker(email,first_name, last_name, phone, team):
+    controller = UserController(session, SECRET_KEY)
+    controller.create_co_worker(email,first_name, last_name, phone, team, session)
+
+@cli.command()
+def update_co_worker():
+    controller = UserController(session, SECRET_KEY)
+    controller.update_co_worker()
 
 # --------------------------------------------------------
     # Commercial

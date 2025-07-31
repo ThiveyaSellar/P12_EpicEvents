@@ -1,5 +1,5 @@
 from datetime import date
-from models import Client
+from models import Client, User, Team
 from views.ClientView import ClientView
 from utils.TokenManagement import TokenManagement
 
@@ -53,20 +53,30 @@ class ClientController:
     def get_clients_ids(self, clients):
         client_ids = []
         for client in clients:
-            client_ids.append(client.id)
+            client_ids.append(int(client.id))
         return client_ids
 
     def update_client(self):
         # Afficher tous les clients de l'utilisateur commercial
         clients = self.display_sales_clients()
-        # Récupérer tous les ids des événements
+        # Récupérer tous les ids des clients
         clients_ids = self.get_clients_ids(clients)
         # Demander de choisir un client
         id = self.view.get_updating_client(clients_ids)
+        if not id:
+            return
         # Récupérer l'objet dans la base
         client = self.session.query(Client).filter(Client.id == id).first()
+        # Récupérer tous les commerciaux
+        # sales_rep = self.session.query(User).filter(User.team.name == "Commercial")
+        sales_rep = (
+            self.session.query(User)
+                .join(User.team)
+                .filter(Team.name == "Commercial")
+                .all()
+        )
         # Le modifier
-        client = self.view.get_client_new_data(client)
+        client = self.view.get_client_new_data(client, sales_rep)
         client.last_update=date.today()
         # Le mettre en base
         self.session.commit()

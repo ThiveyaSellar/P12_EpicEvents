@@ -152,13 +152,13 @@ class TokenManagement:
             "user_id": user.id,
             "email": user.email_address,
             "role": user.team.name,
-            "exp": datetime.now() + timedelta(minutes=3)
+            "exp": datetime.now() + timedelta(minutes=5)
         }
         payload_refresh = {
             "user_id": user.id,
             "email": user.email_address,
             "role": user.team.name,
-            "exp": datetime.now() + timedelta(minutes=5)
+            "exp": datetime.now() + timedelta(minutes=10)
         }
         access_token = TokenManagement.generate_token(payload_access, SECRET_KEY)
         refresh_token = TokenManagement.generate_token(payload_refresh, SECRET_KEY)

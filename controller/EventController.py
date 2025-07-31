@@ -27,7 +27,6 @@ class EventController:
             event_ids.append(event.id)
         return event_ids
 
-
     def update_support_events(self):
         # Afficher tous les événements de l'utilisateur support
         events = self.display_support_events()

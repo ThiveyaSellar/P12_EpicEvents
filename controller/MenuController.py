@@ -23,7 +23,7 @@ class MenuController:
                 if team == "Commercial":
                     self.view.show_sales_menu()
                 elif team == "Gestion":
-                    pass
+                    self.view.show_management_menu()
                 elif team == "Support":
                     self.view.show_support_menu()
 

@@ -46,15 +46,14 @@ class ClientView:
        
     @staticmethod 
     def show_sales_clients(clients):
-        row_format = "{:<5} {:<30} {:<15} {:<15} {:<30} {:<10} {:<20}"
+        row_format = "{:<5} {:<20} {:<30} {:<15} {:<20} {:<15} {:<25} {:<20}"
 
         headers = (
             "Id", "Name", "Email", "Phone", "Company", "Creation date",
-            "Last update"
+            "Last update", "Commercial"
         )
         click.echo(row_format.format(*headers))
-        click.echo(
-            "-" * 200)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-"*150)  # longueur estimée de la ligne, à ajuster si besoin
 
         for client in clients:
             click.echo(row_format.format(
@@ -64,18 +63,62 @@ class ClientView:
                 str(client.phone),
                 client.company,
                 str(client.creation_date),
-                str(client.last_update)
+                str(client.last_update),
+                str(f"{client.commercial.first_name} {client.commercial.last_name}")
             ))
 
     @staticmethod
     def get_updating_client(client_ids):
-        id = int(click.prompt("Which client do you want to update ? "))
-        while id not in client_ids:
-            id = int(click.prompt("Which client do you want to update ? "))
-        return id
+        if not client_ids:
+            click.echo("No clients.")
+            return
+        id = click.prompt(
+            "Which client do you want to update ? [Enter to skip]", default="")
+        if id == "":
+            return
+        while not id.isdigit() or int(id) not in client_ids:
+            click.echo("Invalid id.")
+            id = click.prompt(
+                "Which client do you want to update ? [Enter to skip]", default="")
+            if id == "":
+                return
+        return int(id)
 
     @staticmethod
-    def get_client_new_data(client):
+    def show_sales_reps(sales_reps, default_id):
+        row_format = "{:<10} {:<40}"
+        headers = (
+            "Id", "Name"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo("-------------------")
+        for sale_rep in sales_reps:
+            click.echo(row_format.format(
+                sale_rep.id,
+                f"{sale_rep.first_name} {sale_rep.last_name}",
+            ))
+        valid_ids = [str(s.id) for s in sales_reps]
+        sale_rep_id = str(click.prompt("New sale rep id", default=str(default_id)))
+        while sale_rep_id not in valid_ids:
+            click.echo("Invalid ID. Please choose a valid ID from the list.")
+            sale_rep_id = str(click.prompt("New sale rep id",
+                                       default=str(default_id)))
+        return int(sale_rep_id)
+
+    @staticmethod
+    def ask_change_sales_rep(client, sales_reps):
+        choice = click.prompt(
+            "Do you want change the sale representative ? [Yes/No]")
+        while choice.lower() not in ['yes', 'no', 'y', 'n']:
+            choice = click.prompt(
+                "Do you want change the sale representative ? [Yes/No]")
+        if choice.lower() in ['yes', 'y']:
+            new_commercial_id = ClientView.show_sales_reps(sales_reps,
+                                                           client.commercial_id)
+            client.commercial_id = new_commercial_id
+
+    @staticmethod
+    def get_client_new_data(client, sales_reps):
         if client is None:
             click.echo("client not existent, can't be updated.")
             return
@@ -89,5 +132,7 @@ class ClientView:
                                         default=client.email_address)
         client.phone = click.prompt("Ending date", default=client.phone)
         client.company = click.prompt("Address", default=client.company)
+
+        ClientView.ask_change_sales_rep(client, sales_reps)
 
         return client

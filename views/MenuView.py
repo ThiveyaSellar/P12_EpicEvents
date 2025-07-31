@@ -36,32 +36,43 @@ class MenuView:
     @staticmethod
     def show_support_menu():
         click.echo(f"------------- Support menu -------------")
-        click.echo("1- show-support-events")
-        click.echo("2- update-support-event")
-        click.echo("3- show-clients")
-        click.echo("4- show-contracts")
-        click.echo("5- show-events")
-        click.echo("6- logout")
+        click.echo("show-support-events")
+        click.echo("update-support-event")
+        click.echo("show-clients")
+        click.echo("show-contracts")
+        click.echo("show-events")
+        click.echo("logout")
 
     @staticmethod
     def show_sales_menu():
         click.echo(f"------------- Sales menu -------------")
-        click.echo("1- create-client")
-        click.echo("2- update-client")
-        click.echo("3- show-specific-contracts")
-        click.echo("4- update-my-contracts")
-        click.echo("5- create-event-for-my-client")
-        click.echo("6- show-clients")
-        click.echo("7- show-contracts")
-        click.echo("8- show-events")
-        click.echo("9- logout")
+        click.echo("create-client")
+        click.echo("update-client")
+        click.echo("show-specific-contracts")
+        click.echo("update-my-contracts")
+        click.echo("create-event-for-my-client")
+        click.echo("show-clients")
+        click.echo("show-contracts")
+        click.echo("show-events")
+        click.echo("logout")
+
+    @staticmethod
+    def show_management_menu():
+        click.echo(f"------------- Management menu -------------")
+        click.echo("create-co-worker")
+        click.echo("update-co-worker")
+        click.echo("delete-co-worker")
+        click.echo("show-clients")
+        click.echo("show-contracts")
+        click.echo("show-events")
+        click.echo("logout")
 
     @staticmethod
     def show_main_menu(user, team):
         click.echo(f"------------- Menu {team} -------------")
-        click.echo("1- show-clients")
-        click.echo("2- show-events")
-        click.echo("3- logout")
+        click.echo("show-clients")
+        click.echo("show-events")
+        click.echo("logout")
 
     @staticmethod
     def print_error_message(message):

@@ -3,17 +3,15 @@ from argon2 import PasswordHasher
 
 from models import User, Team
 from views.RegisterView import RegisterView
-from datetime import datetime, timedelta
+
 
 from utils.TokenManagement import TokenManagement
 
-from settings import Settings
-
-"""settings = Settings()
-session = settings.session
-SECRET_KEY = settings.secret_key"""
 
 class RegisterController:
+
+    def __init__(self):
+        self.view = RegisterView()
 
     def validate_password(self, password, password2):
         return password == password2
@@ -32,11 +30,10 @@ class RegisterController:
             TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
 
-    def register(self, email, password, password2, first_name, last_name, phone, team, session, SECRET_KEY):
-        registerView = RegisterView()
+    def register(self, email, password, password2, first_name, last_name, phone, team, session):
 
         if not self.validate_password(password, password2):
-            registerView.print_password_error()
+            self.view.print_password_error()
             return
 
         # Hachage du mot de passe
@@ -59,4 +56,4 @@ class RegisterController:
         session.add(new_user)
         session.commit()
 
-        registerView.success_message(first_name, last_name)
+        self.view.success_message(first_name, last_name)
