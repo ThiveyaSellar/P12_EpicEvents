@@ -11,9 +11,10 @@ class ClientController:
         self.session = session
         self.SECRET_KEY = SECRET_KEY
 
-    def display_all_clients(self, session):
-        clients = session.query(Client).all()
+    def get_all_clients(self):
+        clients = self.session.query(Client).all()
         self.view.show_all_clients(clients)
+        return clients
 
     def create_client(self):
         client_data = self.view.get_new_client_data()

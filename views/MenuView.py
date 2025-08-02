@@ -62,6 +62,8 @@ class MenuView:
         click.echo("create-co-worker")
         click.echo("update-co-worker")
         click.echo("delete-co-worker")
+        click.echo("create-contract")
+        click.echo("update-contract")
         click.echo("show-clients")
         click.echo("show-contracts")
         click.echo("show-events")

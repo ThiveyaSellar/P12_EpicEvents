@@ -2,7 +2,7 @@ import random
 import string
 from argon2 import PasswordHasher
 
-from models import User, Team
+from models import User, Team, Client
 from utils.TokenManagement import TokenManagement
 from views.UserView import UserView
 
@@ -76,6 +76,14 @@ class UserController:
         co_worker = self.view.get_co_worker_new_data(co_worker, teams)
         # Le mettre en base
         self.session.commit()
+
+    def get_my_clients(self):
+        "As a sale representative"
+        user = TokenManagement.get_connected_user(self.session,
+                                                  self.SECRET_KEY)
+        clients = self.session.query(Client).filter(Client.commercial_id == user.id).all()
+        self.view.show_my_clients(clients)
+        return clients
 
 
 

@@ -3,7 +3,7 @@ from argon2 import PasswordHasher
 
 from models import User, Team
 from views.RegisterView import RegisterView
-
+from utils.validators import validate_password
 
 from utils.TokenManagement import TokenManagement
 
@@ -12,9 +12,6 @@ class RegisterController:
 
     def __init__(self):
         self.view = RegisterView()
-
-    def validate_password(self, password, password2):
-        return password == password2
 
     def __hash_passwords(self, password):
         ph = PasswordHasher()
@@ -30,9 +27,19 @@ class RegisterController:
             TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
 
-    def register(self, email, password, password2, first_name, last_name, phone, team, session):
+    @staticmethod
+    def email_exists_in_db(session, email):
+        user = session.query(User).filter_by(email_address=email).first()
+        return user is not None
 
-        if not self.validate_password(password, password2):
+    def register(self, ctx, email, password, password2, first_name, last_name, phone, team):
+        session = ctx.obj["session"]
+
+        if self.email_exists_in_db(session, email):
+            self.view.message_email_exists()
+            return
+
+        if not validate_password(password, password2):
             self.view.print_password_error()
             return
 

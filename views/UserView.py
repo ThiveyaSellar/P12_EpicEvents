@@ -45,10 +45,10 @@ class UserView:
             ))
         valid_ids = [str(s.id) for s in teams]
         team_id = str(
-            click.prompt("New sale rep id", default=str(default_id)))
+            click.prompt("New team id", default=str(default_id)))
         while team_id not in valid_ids:
             click.echo("Invalid ID. Please choose a valid ID from the list.")
-            team_id = str(click.prompt("New sale rep id",
+            team_id = str(click.prompt("New team id",
                                            default=str(default_id)))
         return int(team_id)
 
@@ -78,3 +78,76 @@ class UserView:
         UserView.ask_change_team(co_worker, teams)
 
         return co_worker
+
+    @staticmethod
+    def show_sales_reps(sales_reps, default_id):
+        row_format = "{:<10} {:<40}"
+        headers = (
+            "Id", "Name"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo("-------------------")
+        for sale_rep in sales_reps:
+            click.echo(row_format.format(
+                sale_rep.id,
+                f"{sale_rep.first_name} {sale_rep.last_name}",
+            ))
+        valid_ids = [str(s.id) for s in sales_reps]
+        sale_rep_id = str(
+            click.prompt("Which sale rep id", default=str(default_id)))
+        while sale_rep_id not in valid_ids:
+            click.echo("Invalid ID. Please choose a valid ID from the list.")
+            sale_rep_id = str(click.prompt("Which sale rep id",
+                                           default=str(default_id)))
+        return int(sale_rep_id)
+
+    @staticmethod
+    def show_sales_reps(sales_reps, default_id):
+        row_format = "{:<10} {:<40}"
+        headers = (
+            "Id", "Name"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo("-------------------")
+        for sale_rep in sales_reps:
+            click.echo(row_format.format(
+                sale_rep.id,
+                f"{sale_rep.first_name} {sale_rep.last_name}",
+            ))
+        valid_ids = [str(s.id) for s in sales_reps]
+        sale_rep_id = str(
+            click.prompt("New sale rep id", default=str(default_id)))
+        while sale_rep_id not in valid_ids:
+            click.echo("Invalid ID. Please choose a valid ID from the list.")
+            sale_rep_id = str(click.prompt("New sale rep id",
+                                           default=str(default_id)))
+        return int(sale_rep_id)
+
+    @staticmethod
+    def ask_change_sales_rep(client, sales_reps):
+        choice = click.prompt(
+            "Do you want change the sale representative ? [Yes/No]")
+        while choice.lower() not in ['yes', 'no', 'y', 'n']:
+            choice = click.prompt(
+                "Do you want change the sale representative ? [Yes/No]")
+        if choice.lower() in ['yes', 'y']:
+            new_commercial_id = UserView.show_sales_reps(sales_reps,
+                                                           client.commercial_id)
+            return new_commercial_id
+
+    @staticmethod
+    def show_my_clients(clients):
+        row_format = "{:<10} {:<30} {:<20}"
+
+        headers = (
+            "Id", "Name", "Company"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo("-" * 100)
+
+        for client in clients:
+            click.echo(row_format.format(
+                client.id,
+                f"{client.first_name} {client.last_name}",
+                client.company,
+            ))

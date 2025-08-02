@@ -5,18 +5,18 @@ class EventView:
     @staticmethod
     def show_all_events(events):
 
-        row_format = "{:<30} {:<12} {:<12} {:<50} {:<15} {:<20} {:<15} {:<15} {:<30}"
+        row_format = "{:<10} {:<30} {:<12} {:<12} {:<50} {:<15} {:<20} {:<15} {:<15} {:<30}"
 
         headers = (
-            "Name", "Start Date", "End Date", "Address", "Attendees",
+            "Id","Name", "Start Date", "End Date", "Address", "Attendees",
             "Client", "Support", "Contract id", "Notes"
         )
         click.echo(row_format.format(*headers))
-        click.echo(
-            "-" * 200)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 200)  # longueur estimée de la ligne, à ajuster si besoin
 
         for event in events:
             click.echo(row_format.format(
+                event.id,
                 event.name,
                 str(event.start_date),
                 str(event.end_date),
@@ -78,3 +78,18 @@ class EventView:
         event.notes = click.prompt("Notes", default=event.notes)
 
         return event
+
+    @staticmethod
+    def select_client_for_event(client_ids):
+        id = click.prompt(
+            f"For which client ? {client_ids} [Enter to skip]", default=None)
+        if id is None:
+            return
+        while not id.isdigit() or int(id) not in client_ids:
+            click.echo(
+                "Verify the client ID. You need to create the client before the event.")
+            id = click.prompt(f"For which client ? {client_ids} [Enter to skip]",
+                              default=None)
+            if id is None:
+                return
+        return int(id)

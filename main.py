@@ -1,10 +1,11 @@
 import os, sys, click, jwt, re
-
 # Ajouter le répertoire racine au sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 
 from utils.TokenManagement import TokenManagement
 from models import User, Team, Event, Contract, Client
+from utils.validators import validate_email, validate_phone, validate_name
+
 
 from controller.UserController import UserController
 from controller.MenuController import MenuController
@@ -20,7 +21,7 @@ settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
 
-def email_exists_in_db(session, email):
+"""def email_exists_in_db(session, email):
     user = session.query(User).filter_by(email_address=email).first()
     return user is not None
 
@@ -51,11 +52,15 @@ def validate_name(ctx, param, value):
         else:
             label = param.name.capitalize()
         raise click.BadParameter(f"{label} invalide")
-    return name
+    return name"""
 
 @click.group()
-def cli():
-    pass
+@click.pass_context
+def cli(ctx):
+    if ctx.obj is None:
+        ctx.obj = {}
+    ctx.obj["session"] = session
+    ctx.obj["SECRET_KEY"] = SECRET_KEY
 
 @cli.command()
 @click.option("--email", prompt="Email", callback=validate_email, help="Votre email")
@@ -65,6 +70,7 @@ def login(email, password):
     controller.login(email, password, session, SECRET_KEY)
 
 @cli.command()
+@click.pass_context
 @click.option("--email", prompt="Email", callback=validate_email, help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True,
               help="Votre mot de passe")
@@ -77,9 +83,9 @@ def login(email, password):
 @click.option("--team", type=click.Choice(["Commercial", "Gestion", "Support"],
                                           case_sensitive=False),
               prompt="Équipe", help="Votre équipe")
-def register(email, password, password2, first_name, last_name, phone, team):
+def register(ctx, email, password, password2, first_name, last_name, phone, team):
     controller = RegisterController()
-    controller.register(email, password, password2, first_name, last_name, phone, team, session)
+    controller.register(ctx,email, password, password2, first_name, last_name, phone, team)
 
 @cli.command()
 def logout():
@@ -89,17 +95,18 @@ def logout():
 @cli.command()
 def show_clients():
     controller = ClientController(session, SECRET_KEY)
-    controller.display_all_clients(session)
+    controller.get_all_clients()
 
 @cli.command()
 def show_events():
     controller = EventController(session, SECRET_KEY)
-    controller.display_all_events(session)
+    controller.get_all_events()
 
 @cli.command()
-def show_contracts():
-    controller = ContractController(session, SECRET_KEY)
-    controller.display_all_contracts(session)
+@click.pass_context
+def show_contracts(ctx):
+    controller = ContractController(ctx)
+    controller.display_all_contracts()
 
 # --------------------------------------------------------
     # Support
@@ -114,6 +121,10 @@ def show_support_events():
 def update_support_event():
     controller = EventController(session, SECRET_KEY)
     controller.update_support_events()
+
+# --------------------------------------------------------
+    # Management
+# --------------------------------------------------------
 
 @cli.command()
 @click.option("--email", prompt="Email", callback=validate_email, help="Son email")
@@ -131,6 +142,17 @@ def create_co_worker(email,first_name, last_name, phone, team):
 def update_co_worker():
     controller = UserController(session, SECRET_KEY)
     controller.update_co_worker()
+
+@cli.command()
+def create_contract():
+    controller = ContractController(session, SECRET_KEY)
+    controller.create_contract()
+
+@cli.command()
+@click.pass_context
+def update_contract(ctx):
+    controller = ContractController(ctx)
+    controller.update_contract()
 
 # --------------------------------------------------------
     # Commercial
@@ -152,6 +174,16 @@ def exit():
     controller.exit_program()
     sys.exit()
 
+@cli.command()
+@click.pass_context
+def create_event_for_my_client(ctx):
+    controller = EventController(ctx)
+    controller.create_event_for_my_client()
+
+
+# --------------------------------------------------------
+    # Main
+# --------------------------------------------------------
 def main():
     menu_controller = MenuController()
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide

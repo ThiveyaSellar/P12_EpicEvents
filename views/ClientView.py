@@ -1,25 +1,28 @@
 import click
 
+from views.UserView import UserView
+
+
 class ClientView:
 
     @staticmethod
     def show_all_clients(clients):
 
-        row_format = "{:<20} {:<20} {:<35} {:<30} {:<20} {:<20}"
+        row_format = "{:<10} {:<20} {:<20} {:<35} {:<30} {:<20} {:<20}"
 
         headers = (
-            "First Name", "Last Name", "Email", "Phone", "Company",
+            "Id", "First Name", "Last Name", "Email", "Phone", "Company",
             "Commercial"
         )
         click.echo(row_format.format(*headers))
-        click.echo(
-            "-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
 
         for client in clients:
             click.echo(row_format.format(
+                client.id,
                 client.first_name,
-                str(client.last_name),
-                str(client.email_address),
+                client.last_name,
+                client.email_address,
                 client.phone,
                 client.company,
                 f"{client.commercial.first_name} {client.commercial.last_name}" if client.commercial else "N/A",
@@ -85,39 +88,6 @@ class ClientView:
         return int(id)
 
     @staticmethod
-    def show_sales_reps(sales_reps, default_id):
-        row_format = "{:<10} {:<40}"
-        headers = (
-            "Id", "Name"
-        )
-        click.echo(row_format.format(*headers))
-        click.echo("-------------------")
-        for sale_rep in sales_reps:
-            click.echo(row_format.format(
-                sale_rep.id,
-                f"{sale_rep.first_name} {sale_rep.last_name}",
-            ))
-        valid_ids = [str(s.id) for s in sales_reps]
-        sale_rep_id = str(click.prompt("New sale rep id", default=str(default_id)))
-        while sale_rep_id not in valid_ids:
-            click.echo("Invalid ID. Please choose a valid ID from the list.")
-            sale_rep_id = str(click.prompt("New sale rep id",
-                                       default=str(default_id)))
-        return int(sale_rep_id)
-
-    @staticmethod
-    def ask_change_sales_rep(client, sales_reps):
-        choice = click.prompt(
-            "Do you want change the sale representative ? [Yes/No]")
-        while choice.lower() not in ['yes', 'no', 'y', 'n']:
-            choice = click.prompt(
-                "Do you want change the sale representative ? [Yes/No]")
-        if choice.lower() in ['yes', 'y']:
-            new_commercial_id = ClientView.show_sales_reps(sales_reps,
-                                                           client.commercial_id)
-            client.commercial_id = new_commercial_id
-
-    @staticmethod
     def get_client_new_data(client, sales_reps):
         if client is None:
             click.echo("client not existent, can't be updated.")
@@ -133,6 +103,7 @@ class ClientView:
         client.phone = click.prompt("Ending date", default=client.phone)
         client.company = click.prompt("Address", default=client.company)
 
-        ClientView.ask_change_sales_rep(client, sales_reps)
+        new_commercial_id = UserView.ask_change_sales_rep(client, sales_reps)
+        client.commercial_id = new_commercial_id
 
         return client
