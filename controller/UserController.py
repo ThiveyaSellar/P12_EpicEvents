@@ -1,6 +1,7 @@
 import random
 import string
 from argon2 import PasswordHasher
+from sqlalchemy import func
 
 from models import User, Team, Client
 from utils.TokenManagement import TokenManagement
@@ -8,10 +9,10 @@ from views.UserView import UserView
 
 class UserController:
 
-    def __init__(self,session, SECRET_KEY):
+    def __init__(self,ctx):
         self.view = UserView()
-        self.session = session
-        self.SECRET_KEY = SECRET_KEY
+        self.session = ctx.obj["session"]
+        self.SECRET_KEY = ctx.obj["SECRET_KEY"]
 
     @staticmethod
     def generate_password(length=12):
@@ -23,7 +24,7 @@ class UserController:
         ph = PasswordHasher()
         return ph.hash(password)
 
-    def create_co_worker(self, email, first_name, last_name, phone, team, session):
+    def create_co_worker(self, email, first_name, last_name, phone, team):
 
         # Générer un mot de passe basique, l'utilisateur devra le changer
         password = team.lower()
@@ -32,7 +33,7 @@ class UserController:
         hashed_password = self.__hash_passwords(password)
 
         # Récupérer l'id de l'équipe
-        team_id = session.query(Team).filter_by(name=team).first().id
+        team_id = self.session.query(Team).filter_by(name=team).first().id
 
         # Création de l'utilisateur
         new_user = User(
@@ -45,8 +46,8 @@ class UserController:
         )
 
         # Enregistrement dans la base de données
-        session.add(new_user)
-        session.commit()
+        self.session.add(new_user)
+        self.session.commit()
 
         self.view.success_message(first_name, last_name)
 
@@ -84,6 +85,10 @@ class UserController:
         clients = self.session.query(Client).filter(Client.commercial_id == user.id).all()
         self.view.show_my_clients(clients)
         return clients
+
+    def get_employees_from_team(self,team):
+        employees = self.session.query(User).join(Team).filter(func.lower(Team.name) == team.lower()).all()
+        return employees
 
 
 

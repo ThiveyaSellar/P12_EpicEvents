@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import click
 
 class EventView:
@@ -82,8 +84,8 @@ class EventView:
     @staticmethod
     def select_client_for_event(client_ids):
         id = click.prompt(
-            f"For which client ? {client_ids} [Enter to skip]", default=None)
-        if id is None:
+            f"For which client ? {client_ids} [Enter to skip]", default="")
+        if id == "":
             return
         while not id.isdigit() or int(id) not in client_ids:
             click.echo(
@@ -93,3 +95,69 @@ class EventView:
             if id is None:
                 return
         return int(id)
+
+    @staticmethod
+    def select_support_for_event(support_ids):
+        id = click.prompt(
+            f"Which support agent do you want to assign for the event? {support_ids} [Enter to skip]", default="")
+        if id == "":
+            return
+        while not id.isdigit() or int(id) not in support_ids:
+            click.echo("Verify the support Id.")
+            id = click.prompt(
+                f"Which support agent do you want to assign for the event? {support_ids} [Enter to skip]",
+                default=None)
+            if id is None:
+                return
+        return int(id)
+
+    @staticmethod
+    def ask_date(date_type, default=None):
+        default_date = default if default else None
+        while True:
+            string_date = click.prompt(f"Enter a {date_type} date (YYYY-MM-DD)", default=default_date, show_default=default_date is not None)
+            try:
+                date_obj = datetime.strptime(string_date.strip(), "%Y-%m-%d").date()
+                return date_obj
+            except ValueError:
+                click.echo("Invalid format, use YYYY-MM-DD (ex : 2025-08-01)")
+
+    @staticmethod
+    def ask_period():
+        today = datetime.today().date()
+        while True:
+            starting_date = EventView.ask_date("starting")
+            if starting_date < today:
+                click.echo(
+                    "The start date cannot be in the past. Please try again.")
+                continue
+            ending_date = EventView.ask_date("ending")
+            if ending_date >= starting_date:
+                break
+            click.echo(
+                "The end date must be after the start date. Please try again.")
+        return starting_date, ending_date
+
+    @staticmethod
+    def ask_notes(default_notes=None):
+        click.echo("Take or edit notes in the editor and close the window")
+        notes = click.edit(default_notes)
+        if notes is not None:
+            click.echo(notes)
+            notes = notes.strip()
+        else:
+            notes = ""
+        return notes
+
+    @staticmethod
+    def get_new_event_data():
+        event = {}
+        click.echo("Enter new event informations :")
+        event["name"] = click.prompt("Name")
+        event["start_date"], event["end_date"] = EventView.ask_period()
+        event["address"] = click.prompt("Address", default="", show_default=False)
+        event["nb_attendees"] = click.prompt("Number of attendees", type=int)
+        event["notes"]  = EventView.ask_notes()
+
+
+        return event

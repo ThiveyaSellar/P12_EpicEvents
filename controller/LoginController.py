@@ -10,11 +10,17 @@ from views.LoginView import LoginView
 
 class LoginController:
 
-    def check_user_mail(self, session, email):
+    def __init__(self, ctx):
+        self.view = LoginView()
+        self.session = ctx.obj["session"]
+        self.SECRET_KEY = ctx.obj["SECRET_KEY"]
+
+
+    def check_user_mail(self, email):
         # Récupération utilisateur associé au mail
         email = email.strip().lower()
 
-        return session.query(User).filter_by(email_address=email).one()
+        return self.session.query(User).filter_by(email_address=email).one()
 
     def define_token(self, user, SECRET_KEY, time):
         payload = {
@@ -42,51 +48,48 @@ class LoginController:
         except:
             return False
 
-    def login(self, email, password, session, SECRET_KEY):
-        session.expire_all()
-        loginView = LoginView()
+    def login(self, email, password):
+        self.session.expire_all()
         ph = PasswordHasher()
 
         # Vérifier l'email utilisé pour la connexion
         # Récupérer l'utilisateur associé
         try:
-            user = self.check_user_mail(session, email.strip().lower())
+            user = self.check_user_mail(email.strip().lower())
         except NoResultFound:
-            loginView.print_user_not_found()
+            self.view.print_user_not_found()
             return
         # Vérifier le mot de passe saisi
         # avec le mot de passe de l'utilisateur récupéré
         if not self.verify_password(ph, user.password, password):
-            loginView.print_password_error()
+            self.view.print_password_error()
             return
 
         # Générer les tokens
-        access_token = self.define_token(user, SECRET_KEY, 1)
-        refresh_token = self.define_token(user, SECRET_KEY, 3)
+        access_token = self.define_token(user, self.SECRET_KEY, 1)
+        refresh_token = self.define_token(user, self.SECRET_KEY, 3)
 
         # Sauvegarder le token de rafraichissement dans la base de données
         user.token = refresh_token
-        session.commit()
+        self.session.commit()
 
         # Ecrire les tokens dans le fichier netrc
         self.write_in_netrc(access_token, refresh_token)
-        loginView.print_welcome_message(user)
+        self.view.print_welcome_message(user)
 
 
     def logout(self):
         # Demander confirmation de déconnexion
-        loginView = LoginView()
-        logging_out = loginView.get_logout_confirmation()
+        logging_out = self.view.get_logout_confirmation()
         machine = "127.0.0.1"
         if logging_out:
             netrc_path = TokenManagement.get_netrc_path()
             TokenManagement.update_tokens_in_netrc(machine,"","",netrc_path)
-            loginView.print_logged_out_message()
+            self.view.print_logged_out_message()
             exit()
         else:
-            loginView.print_staying_logged_message()
+            self.view.print_staying_logged_message()
 
     def exit_program(self):
-        loginView = LoginView()
-        loginView.print_exit_message()
+        self.view.print_exit_message()
 

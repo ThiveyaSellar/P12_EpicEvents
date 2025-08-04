@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 
 from utils.TokenManagement import TokenManagement
 from models import User, Team, Event, Contract, Client
-from utils.validators import validate_email, validate_phone, validate_name
+from utils.validators import validate_email_callback, validate_phone_callback, validate_name
 
 
 from controller.UserController import UserController
@@ -21,39 +21,6 @@ settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
 
-"""def email_exists_in_db(session, email):
-    user = session.query(User).filter_by(email_address=email).first()
-    return user is not None
-
-def validate_email(ctx, param, value):
-    email = value
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        raise click.BadParameter("L'email n'est pas valide.")
-    # Vérifier dans le cas d'une inscription si le mail existe déjà ou non
-    if ctx.command.name == "register":
-        if email_exists_in_db(session, email):
-            raise click.BadParameter("Cet email est déjà utilisé.")
-    return email
-
-def validate_phone(ctx, param, value):
-    phone = value
-    pattern = r"^0[1-9](\d{2}){4}$"
-    if not re.match(pattern, phone):
-        raise click.BadParameter("Le numéro n'est pas valide.")
-    return phone
-
-def validate_name(ctx, param, value):
-    name = value
-    if not re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ\-']+$", name):
-        if param.name == "last_name":
-            label = "Nom"
-        elif param.name == "first_name":
-            label = "Prénom"
-        else:
-            label = param.name.capitalize()
-        raise click.BadParameter(f"{label} invalide")
-    return name"""
-
 @click.group()
 @click.pass_context
 def cli(ctx):
@@ -63,15 +30,16 @@ def cli(ctx):
     ctx.obj["SECRET_KEY"] = SECRET_KEY
 
 @cli.command()
-@click.option("--email", prompt="Email", callback=validate_email, help="Votre email")
+@click.pass_context
+@click.option("--email", prompt="Email", callback=validate_email_callback, help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True, help="Votre mot de passe")
-def login(email, password):
-    controller = LoginController()
-    controller.login(email, password, session, SECRET_KEY)
+def login(ctx, email, password):
+    controller = LoginController(ctx)
+    controller.login(email, password)
 
 @cli.command()
 @click.pass_context
-@click.option("--email", prompt="Email", callback=validate_email, help="Votre email")
+@click.option("--email", prompt="Email", callback=validate_email_callback, help="Votre email")
 @click.option("--password", prompt="Mot de passe", hide_input=True,
               help="Votre mot de passe")
 @click.option("--password2", prompt="Confirmation de mot de passe",
@@ -79,32 +47,35 @@ def login(email, password):
               help="Votre mot de passe")
 @click.option("--first_name", prompt="Prénom", callback=validate_name, help="Votre prénom")
 @click.option("--last_name", prompt="Nom", callback=validate_name, help="Votre nom")
-@click.option("--phone", prompt="Numéro de téléphone", callback=validate_phone, help="Votre téléphone")
+@click.option("--phone", prompt="Numéro de téléphone", callback=validate_phone_callback, help="Votre téléphone")
 @click.option("--team", type=click.Choice(["Commercial", "Gestion", "Support"],
                                           case_sensitive=False),
               prompt="Équipe", help="Votre équipe")
 def register(ctx, email, password, password2, first_name, last_name, phone, team):
-    controller = RegisterController()
-    controller.register(ctx,email, password, password2, first_name, last_name, phone, team)
+    controller = RegisterController(ctx)
+    controller.register(email, password, password2, first_name, last_name, phone, team)
 
 @cli.command()
-def logout():
-    controller = LoginController()
+@click.pass_context
+def logout(ctx):
+    controller = LoginController(ctx)
     controller.logout()
 
 @cli.command()
-def show_clients():
-    controller = ClientController(session, SECRET_KEY)
+@click.pass_context
+def list_clients(ctx):
+    controller = ClientController(ctx)
     controller.get_all_clients()
 
 @cli.command()
-def show_events():
-    controller = EventController(session, SECRET_KEY)
+@click.pass_context
+def list_events(ctx):
+    controller = EventController(ctx)
     controller.get_all_events()
 
 @cli.command()
 @click.pass_context
-def show_contracts(ctx):
+def list_contracts(ctx):
     controller = ContractController(ctx)
     controller.display_all_contracts()
 
@@ -113,13 +84,15 @@ def show_contracts(ctx):
 # --------------------------------------------------------
 
 @cli.command()
-def show_support_events():
-    controller = EventController(session, SECRET_KEY)
+@click.pass_context
+def list_my_events(ctx):
+    controller = EventController(ctx)
     controller.display_support_events()
 
 @cli.command()
-def update_support_event():
-    controller = EventController(session, SECRET_KEY)
+@click.pass_context
+def update_my_event(ctx):
+    controller = EventController(ctx)
     controller.update_support_events()
 
 # --------------------------------------------------------
@@ -127,25 +100,28 @@ def update_support_event():
 # --------------------------------------------------------
 
 @cli.command()
-@click.option("--email", prompt="Email", callback=validate_email, help="Son email")
+@click.pass_context
+@click.option("--email", prompt="Email", callback=validate_email_callback, help="Son email")
 @click.option("--first_name", prompt="Prénom", callback=validate_name, help="Son prénom")
 @click.option("--last_name", prompt="Nom", callback=validate_name, help="Son nom")
-@click.option("--phone", prompt="Numéro de téléphone", callback=validate_phone, help="Son téléphone")
+@click.option("--phone", prompt="Numéro de téléphone", callback=validate_phone_callback, help="Son téléphone")
 @click.option("--team", type=click.Choice(["Commercial", "Gestion", "Support"],
                                           case_sensitive=False),
               prompt="Son équipe", help="Son équipe")
-def create_co_worker(email,first_name, last_name, phone, team):
-    controller = UserController(session, SECRET_KEY)
-    controller.create_co_worker(email,first_name, last_name, phone, team, session)
+def create_co_worker(ctx, email,first_name, last_name, phone, team):
+    controller = UserController(ctx)
+    controller.create_co_worker(email,first_name, last_name, phone, team)
 
 @cli.command()
-def update_co_worker():
-    controller = UserController(session, SECRET_KEY)
+@click.pass_context
+def update_co_worker(ctx):
+    controller = UserController(ctx)
     controller.update_co_worker()
 
 @cli.command()
-def create_contract():
-    controller = ContractController(session, SECRET_KEY)
+@click.pass_context
+def create_contract(ctx):
+    controller = ContractController(ctx)
     controller.create_contract()
 
 @cli.command()
@@ -159,18 +135,21 @@ def update_contract(ctx):
 # --------------------------------------------------------
 
 @cli.command()
-def create_client():
-    controller = ClientController(session, SECRET_KEY)
+@click.pass_context
+def create_client(ctx):
+    controller = ClientController(ctx)
     controller.create_client()
 
 @cli.command()
-def update_client():
-    controller = ClientController(session, SECRET_KEY)
+@click.pass_context
+def update_client(ctx):
+    controller = ClientController(ctx)
     controller.update_client()
 
 @cli.command()
-def exit():
-    controller = LoginController()
+@click.pass_context
+def exit(ctx):
+    controller = LoginController(ctx)
     controller.exit_program()
     sys.exit()
 
@@ -179,7 +158,6 @@ def exit():
 def create_event_for_my_client(ctx):
     controller = EventController(ctx)
     controller.create_event_for_my_client()
-
 
 # --------------------------------------------------------
     # Main

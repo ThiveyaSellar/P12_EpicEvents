@@ -1,13 +1,13 @@
 import click, re
 
 
-def validate_email(ctx, param, value):
+def validate_email_callback(ctx, param, value):
     email = value
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         raise click.BadParameter("L'email n'est pas valide.")
     return email
 
-def validate_phone(ctx, param, value):
+def validate_phone_callback(ctx, param, value):
     phone = value
     pattern = r"^0[1-9](\d{2}){4}$"
     if not re.match(pattern, phone):
@@ -28,3 +28,14 @@ def validate_name(ctx, param, value):
 
 def validate_password(password, password2):
     return password == password2
+
+def validate_email(value):
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
+        raise click.BadParameter("L'email n'est pas valide.")
+    return value.strip()
+
+def validate_phone(value):
+    pattern = r"^0[1-9](\d{2}){4}$"
+    if not re.match(pattern, value):
+        raise click.BadParameter("Le numéro n'est pas valide.")
+    return value.strip()

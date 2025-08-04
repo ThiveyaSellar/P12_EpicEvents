@@ -1,8 +1,8 @@
 # Permissions par équipe
 all_permissions = [
-    "show-clients",
-    "show-contracts",
-    "show-events",
+    "list-clients",
+    "list-contracts",
+    "list-events",
     "logout",
     "exit"
 ]
@@ -11,16 +11,15 @@ sales_permissions = all_permissions + \
                     [
                         "create-client",
                         "update-client",
-                        "show-filtered-contracts",
+                        "list-filtered-contracts",
                         "update-my-contracts",
-                        "create-event-for-my-client"
+                        "create-event-for-my-client",
                     ]
 
 support_permissions = all_permissions + \
                       [
-                          "update-support-event",
-                          "show-support-events"
-                          # ...
+                          "update-my-event",
+                          "list-my-events"
                       ]
 
 management_permissions = all_permissions + \
@@ -30,9 +29,6 @@ management_permissions = all_permissions + \
                              "delete-co-worker",
                              "create-contract",
                              "update-contract",
-                             "show-filtered-events"
-                             "update-event"
-                             # ...
                          ]
 
 PERMISSIONS = {

@@ -1,6 +1,7 @@
 import click
 
 from views.UserView import UserView
+from utils.validators import validate_email, validate_phone
 
 
 class ClientView:
@@ -34,8 +35,8 @@ class ClientView:
         click.echo("Enter new client informations :")
         client["first_name"] = click.prompt("First name")
         client["last_name"] = click.prompt("Last name")
-        client["email_address"] = click.prompt("Email address")
-        client["phone"] = click.prompt("Phone")
+        client["email_address"] = click.prompt("Email address", value_proc=validate_email)
+        client["phone"] = click.prompt("Phone", value_proc=validate_phone)
         client["company"] = click.prompt("Company name")
         return client
 

@@ -36,11 +36,11 @@ class MenuView:
     @staticmethod
     def show_support_menu():
         click.echo(f"------------- Support menu -------------")
-        click.echo("show-support-events")
-        click.echo("update-support-event")
-        click.echo("show-clients")
-        click.echo("show-contracts")
-        click.echo("show-events")
+        click.echo("list-my-events")
+        click.echo("update-my-event")
+        click.echo("list-clients")
+        click.echo("list-contracts")
+        click.echo("list-events")
         click.echo("logout")
 
     @staticmethod
@@ -48,12 +48,13 @@ class MenuView:
         click.echo(f"------------- Sales menu -------------")
         click.echo("create-client")
         click.echo("update-client")
-        click.echo("show-specific-contracts")
+        click.echo("list-specific-contracts")
         click.echo("update-my-contracts")
         click.echo("create-event-for-my-client")
-        click.echo("show-clients")
-        click.echo("show-contracts")
-        click.echo("show-events")
+        click.echo("update-my-event")
+        click.echo("list-clients")
+        click.echo("list-contracts")
+        click.echo("list-events")
         click.echo("logout")
 
     @staticmethod
@@ -64,16 +65,16 @@ class MenuView:
         click.echo("delete-co-worker")
         click.echo("create-contract")
         click.echo("update-contract")
-        click.echo("show-clients")
-        click.echo("show-contracts")
-        click.echo("show-events")
+        click.echo("list-clients")
+        click.echo("list-contracts")
+        click.echo("list-events")
         click.echo("logout")
 
     @staticmethod
     def show_main_menu(user, team):
         click.echo(f"------------- Menu {team} -------------")
-        click.echo("show-clients")
-        click.echo("show-events")
+        click.echo("list-clients")
+        click.echo("list-events")
         click.echo("logout")
 
     @staticmethod

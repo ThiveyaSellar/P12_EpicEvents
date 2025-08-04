@@ -6,10 +6,10 @@ from utils.TokenManagement import TokenManagement
 
 class ClientController:
 
-    def __init__(self, session, SECRET_KEY):
+    def __init__(self, ctx):
         self.view = ClientView()
-        self.session = session
-        self.SECRET_KEY = SECRET_KEY
+        self.session = ctx.obj["session"]
+        self.SECRET_KEY = ctx.obj["SECRET_KEY"]
 
     def get_all_clients(self):
         clients = self.session.query(Client).all()
@@ -69,7 +69,6 @@ class ClientController:
         # Récupérer l'objet dans la base
         client = self.session.query(Client).filter(Client.id == id).first()
         # Récupérer tous les commerciaux
-        # sales_rep = self.session.query(User).filter(User.team.name == "Commercial")
         sales_rep = (
             self.session.query(User)
                 .join(User.team)

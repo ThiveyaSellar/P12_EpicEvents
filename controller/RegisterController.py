@@ -10,8 +10,10 @@ from utils.TokenManagement import TokenManagement
 
 class RegisterController:
 
-    def __init__(self):
+    def __init__(self, ctx):
         self.view = RegisterView()
+        self.session =ctx.obj["session"]
+        self.SECRET_KEY = ctx.obj["SECRET_KEY"]
 
     def __hash_passwords(self, password):
         ph = PasswordHasher()
@@ -27,15 +29,14 @@ class RegisterController:
             TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
                                    netrc_path)
 
-    @staticmethod
-    def email_exists_in_db(session, email):
-        user = session.query(User).filter_by(email_address=email).first()
+
+    def email_exists_in_db(self, email):
+        user = self.session.query(User).filter_by(email_address=email).first()
         return user is not None
 
-    def register(self, ctx, email, password, password2, first_name, last_name, phone, team):
-        session = ctx.obj["session"]
+    def register(self, email, password, password2, first_name, last_name, phone, team):
 
-        if self.email_exists_in_db(session, email):
+        if self.email_exists_in_db(email):
             self.view.message_email_exists()
             return
 
@@ -47,7 +48,7 @@ class RegisterController:
         hashed_password = self.__hash_passwords(password)
 
         # Récupérer l'id de l'équipe
-        team_id = session.query(Team).filter_by(name=team).first().id
+        team_id = self.session.query(Team).filter_by(name=team).first().id
 
         # Création de l'utilisateur
         new_user = User(
@@ -60,7 +61,7 @@ class RegisterController:
         )
 
         # Enregistrement dans la base de données
-        session.add(new_user)
-        session.commit()
+        self.session.add(new_user)
+        self.session.commit()
 
         self.view.success_message(first_name, last_name)
