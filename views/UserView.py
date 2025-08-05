@@ -25,9 +25,9 @@ class UserView:
 
     @staticmethod
     def get_co_worker(co_workers_ids, action):
-        id = int(click.prompt(f"Which co_worker do you want to {action} ? "))
+        id = int(click.prompt(f"Which co worker do you want to {action} ? "))
         while id not in co_workers_ids:
-            id = int(click.prompt(f"Which co_worker do you want to {action} ? "))
+            id = int(click.prompt(f"Which co worker do you want to {action} ? "))
         return id
 
     @staticmethod
@@ -159,3 +159,24 @@ class UserView:
                 f"{client.first_name} {client.last_name}",
                 client.company,
             ))
+
+    @staticmethod
+    def choose_support_collab(support_employees):
+        row_format = "{:<10} {:<40}"
+        headers = (
+            "Id", "Name"
+        )
+        click.echo(row_format.format(*headers))
+        click.echo("-------------------")
+        for employee in support_employees:
+            click.echo(row_format.format(
+                employee.id,
+                f"{employee.first_name} {employee.last_name}",
+            ))
+        valid_ids = [str(s.id) for s in support_employees]
+        support_id = str(
+            click.prompt("Which support co_worker do you want to add to the event ? "))
+        while support_id not in valid_ids:
+            click.echo("Invalid ID. Please choose a valid ID from the list.")
+            support_id = str(click.prompt("Which support co_worker do you want to add to the event ? "))
+        return support_id

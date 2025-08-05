@@ -136,6 +136,23 @@ def update_contract(ctx):
     controller = ContractController(ctx)
     controller.update_contract()
 
+@cli.command()
+@click.pass_context
+def list_events_without_support(ctx):
+    controller = EventController(ctx)
+    controller.list_events_without_support()
+
+@cli.command()
+@click.pass_context
+def list_events_without_contract(ctx):
+    controller = EventController(ctx)
+    controller.list_events_without_contract()
+
+@cli.command()
+@click.pass_context
+def add_support_collab_to_event(ctx):
+    controller = EventController(ctx)
+    controller.add_support_collab_to_event()
 # --------------------------------------------------------
     # Commercial
 # --------------------------------------------------------

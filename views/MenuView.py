@@ -68,6 +68,9 @@ class MenuView:
         click.echo("list-clients")
         click.echo("list-contracts")
         click.echo("list-events")
+        click.echo("list-events-without-support")
+        click.echo("list-events-without-contract")
+        click.echo("add-support-collab-to-event")
         click.echo("logout")
 
     @staticmethod

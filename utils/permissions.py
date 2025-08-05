@@ -29,6 +29,9 @@ MANAGEMENT_PERMISSIONS = all_permissions + \
                              "delete-co-worker",
                              "create-contract",
                              "update-contract",
+                             "list-events-without-support",
+                             "list-events-without-contract",
+                             "add-support-collab-to-event"
                          ]
 
 PERMISSIONS = {

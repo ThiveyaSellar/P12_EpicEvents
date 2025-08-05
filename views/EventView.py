@@ -5,7 +5,7 @@ import click
 class EventView:
 
     @staticmethod
-    def show_all_events(events):
+    def show_events(events):
 
         row_format = "{:<10} {:<30} {:<12} {:<12} {:<50} {:<15} {:<20} {:<15} {:<15} {:<30}"
 
@@ -14,7 +14,7 @@ class EventView:
             "Client", "Support", "Contract id", "Notes"
         )
         click.echo(row_format.format(*headers))
-        click.echo("-" * 200)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
 
         for event in events:
             click.echo(row_format.format(
@@ -159,5 +159,8 @@ class EventView:
         event["nb_attendees"] = click.prompt("Number of attendees", type=int)
         event["notes"]  = EventView.ask_notes()
 
-
         return event
+
+    @staticmethod
+    def message_event_not_found():
+        click.echo("Event not found.")
