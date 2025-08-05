@@ -120,6 +120,12 @@ def update_co_worker(ctx):
 
 @cli.command()
 @click.pass_context
+def delete_co_worker(ctx):
+    controller = UserController(ctx)
+    controller.delete_co_worker()
+
+@cli.command()
+@click.pass_context
 def create_contract(ctx):
     controller = ContractController(ctx)
     controller.create_contract()
@@ -136,13 +142,13 @@ def update_contract(ctx):
 
 @cli.command()
 @click.pass_context
-def create_client(ctx):
+def create_my_client(ctx):
     controller = ClientController(ctx)
     controller.create_client()
 
 @cli.command()
 @click.pass_context
-def update_client(ctx):
+def update_my_client(ctx):
     controller = ClientController(ctx)
     controller.update_client()
 

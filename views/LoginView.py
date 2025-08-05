@@ -16,14 +16,14 @@ class LoginView:
 
     @staticmethod
     def get_logout_confirmation():
-        while True:
-            choice = input("Confirmez-vous votre déconnexion ? (o/n) : ").strip().lower()
-            if choice == 'o':
-                return True
-            elif choice == 'n':
-                return False
-            else:
-                print("Veuillez saisir 'o' pour oui 'n' pour non.")
+        choice = ""
+        while choice not in ("o", "n"):
+            choice = input(
+                "Confirmez-vous votre déconnexion ? (o/n) : ").strip().lower()
+            if choice not in ("o", "n"):
+                print("Veuillez saisir 'o' pour oui ou 'n' pour non.")
+
+        return choice == 'o'
 
     @staticmethod
     def print_logged_out_message():

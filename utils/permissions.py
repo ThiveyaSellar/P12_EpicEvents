@@ -7,22 +7,22 @@ all_permissions = [
     "exit"
 ]
 
-sales_permissions = all_permissions + \
+SALES_PERMISSIONS = all_permissions + \
                     [
-                        "create-client",
-                        "update-client",
+                        "create-my-client",
+                        "update-my-client",
                         "list-filtered-contracts",
                         "update-my-contracts",
                         "create-event-for-my-client",
                     ]
 
-support_permissions = all_permissions + \
+SUPPORT_PERMISSIONS = all_permissions + \
                       [
                           "update-my-event",
                           "list-my-events"
                       ]
 
-management_permissions = all_permissions + \
+MANAGEMENT_PERMISSIONS = all_permissions + \
                          [
                              "create-co-worker",
                              "update-co-worker",
@@ -32,9 +32,9 @@ management_permissions = all_permissions + \
                          ]
 
 PERMISSIONS = {
-    "Commercial": sales_permissions,
-    "Support": support_permissions,
-    "Gestion": management_permissions
+    "Commercial": SALES_PERMISSIONS,
+    "Support": SUPPORT_PERMISSIONS,
+    "Gestion": MANAGEMENT_PERMISSIONS
 }
 
 def is_authorized(team, command, permissions):

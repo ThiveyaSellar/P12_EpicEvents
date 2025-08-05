@@ -46,8 +46,8 @@ class MenuView:
     @staticmethod
     def show_sales_menu():
         click.echo(f"------------- Sales menu -------------")
-        click.echo("create-client")
-        click.echo("update-client")
+        click.echo("create-my-client")
+        click.echo("update-my-client")
         click.echo("list-specific-contracts")
         click.echo("update-my-contracts")
         click.echo("create-event-for-my-client")

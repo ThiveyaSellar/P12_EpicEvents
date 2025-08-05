@@ -14,7 +14,6 @@ class EventController:
 
     def get_all_events(self):
         events = self.session.query(Event).all()
-        print(events)
         self.view.show_all_events(events)
         return events
 

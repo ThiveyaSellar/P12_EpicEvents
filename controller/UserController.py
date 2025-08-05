@@ -3,7 +3,7 @@ import string
 from argon2 import PasswordHasher
 from sqlalchemy import func
 
-from models import User, Team, Client
+from models import User, Team, Client, Contract, Event
 from utils.TokenManagement import TokenManagement
 from views.UserView import UserView
 
@@ -62,21 +62,56 @@ class UserController:
             co_workers_ids.append(co_worker.id)
         return co_workers_ids
 
-    def update_co_worker(self):
-        # Afficher tous les événements de l'utilisateur support
+    def select_co_worker(self, action_name):
+        # Afficher tous les collaborateurs
         co_workers = self.display_co_workers()
-        # Récupérer tous les ids des événements
+        # Récupérer les IDs
         co_workers_ids = self.get_co_workers_ids(co_workers)
-        # Demander de choisir un événement
-        id = self.view.get_updating_co_worker(co_workers_ids)
-        # Récupérer l'objet dans la base
-        co_worker = self.session.query(User).filter(User.id == id).first()
+        # Demander de choisir un collaborateur selon l'action
+        id = self.view.get_co_worker(co_workers_ids, action_name)
+        # Retourner l'objet User
+        return self.session.query(User).filter(User.id == id).first()
+
+    def update_co_worker(self):
+        co_worker = self.select_co_worker("update")
         # Récupérer toutes les équipes
         teams = (self.session.query(Team).all())
         # Le modifier
         co_worker = self.view.get_co_worker_new_data(co_worker, teams)
         # Le mettre en base
         self.session.commit()
+
+    def update_co_worker_related_data(self, co_worker):
+        if co_worker.team == "Commercial":
+            clients = self.session.query(Client).filter(
+                Client.commercial_id == co_worker.id).all()
+            for client in clients:
+                client.commercial_id = None
+            contracts = self.session.query(Contract).filter(
+                Contract.commercial_id == co_worker.id).all()
+            for contract in contracts:
+                contract.commercial_id = None
+        elif co_worker.team == "Support":
+            events = self.session.query(Event).filter(
+                Event.commercial_id == co_worker.id).all()
+            for event in events:
+                event.commercial_id = None
+        elif co_worker.team == "Gestion":
+            pass
+
+
+    def delete_co_worker(self):
+        co_worker = self.select_co_worker("delete")
+        if co_worker:
+            # Mettre à jour les colonnes dans les autres tables
+            self.update_co_worker_related_data(co_worker)
+            # Supprimer le co-worker
+            self.session.delete(co_worker)
+            self.session.commit()
+        if not self.session.query(User).filter(co_worker.id == User.id).first():
+            self.view.message_co_worker_deleted()
+        else:
+            self.view.message_inexistent_co_worker()
 
     def get_my_clients(self):
         "As a sale representative"

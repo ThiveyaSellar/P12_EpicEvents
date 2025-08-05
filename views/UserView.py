@@ -24,11 +24,19 @@ class UserView:
             ))
 
     @staticmethod
-    def get_updating_co_worker(co_workers_ids):
-        id = int(click.prompt("Which co_worker do you want to update ? "))
+    def get_co_worker(co_workers_ids, action):
+        id = int(click.prompt(f"Which co_worker do you want to {action} ? "))
         while id not in co_workers_ids:
-            id = int(click.prompt("Which co_worker do you want to update ? "))
+            id = int(click.prompt(f"Which co_worker do you want to {action} ? "))
         return id
+
+    @staticmethod
+    def message_co_worker_not_found():
+        click.echo("Co_worker not found.")
+
+    @staticmethod
+    def message_co_worker_deleted():
+        click.echo("Co_worker deleted.")
 
     @staticmethod
     def show_teams(teams, default_id):
