@@ -63,10 +63,10 @@ class UserView:
     @staticmethod
     def ask_change_team(co_worker, teams):
         choice = click.prompt(
-            "Do you want change the team of the co-worker ? [Yes/No]")
+            "Do you want to change the team of the co-worker ? [Yes/No]")
         while choice.lower() not in ['yes', 'no', 'y', 'n']:
             choice = click.prompt(
-                "Do you want change the team of the co-worker ? [Yes/No]")
+                "Do you want change to the team of the co-worker ? [Yes/No]")
         if choice.lower() in ['yes', 'y']:
             co_worker.team_id = UserView.show_teams(teams, co_worker.team_id)
 
@@ -134,14 +134,15 @@ class UserView:
     @staticmethod
     def ask_change_sales_rep(client, sales_reps):
         choice = click.prompt(
-            "Do you want change the sale representative ? [Yes/No]")
+            "Do you want to change the sale representative ? [Yes/No]")
         while choice.lower() not in ['yes', 'no', 'y', 'n']:
             choice = click.prompt(
-                "Do you want change the sale representative ? [Yes/No]")
+                "Do you want change to the sale representative ? [Yes/No]")
         if choice.lower() in ['yes', 'y']:
             new_commercial_id = UserView.show_sales_reps(sales_reps,
                                                            client.commercial_id)
             return new_commercial_id
+        return
 
     @staticmethod
     def show_my_clients(clients):

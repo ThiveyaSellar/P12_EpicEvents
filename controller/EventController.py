@@ -55,7 +55,8 @@ class EventController:
 
     def create_event_for_my_client(self):
         # Afficher mes clients
-        user_controller = UserController(self.session, self.SECRET_KEY)
+        ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
+        user_controller = UserController(SimpleNamespace(obj=ctx))
         clients = user_controller.get_my_clients()
         clients_ids = get_ids(clients)
         # Demander de choisir un client par l'id

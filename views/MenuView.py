@@ -50,6 +50,7 @@ class MenuView:
         click.echo("update-my-client")
         click.echo("list-specific-contracts")
         click.echo("update-my-contracts")
+        click.echo("update-contract")
         click.echo("create-event-for-my-client")
         click.echo("update-my-event")
         click.echo("list-clients")

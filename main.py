@@ -77,7 +77,7 @@ def list_events(ctx):
 @click.pass_context
 def list_contracts(ctx):
     controller = ContractController(ctx)
-    controller.display_all_contracts()
+    controller.list_contracts()
 
 # --------------------------------------------------------
     # Support
@@ -193,6 +193,12 @@ def list_unpaid_contracts(ctx):
 def list_unsigned_contracts(ctx):
     controller = ContractController(ctx)
     controller.list_unsigned_contracts()
+
+@cli.command()
+@click.pass_context
+def update_my_contracts(ctx):
+    controller = ContractController(ctx)
+    controller.sales_rep_update_assigned_contracts()
 
 # --------------------------------------------------------
     # Main

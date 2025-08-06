@@ -92,13 +92,13 @@ class ContractView:
             click.echo("No contracts.")
             return
         id = click.prompt(
-            "Which contract do you want to update ? [Enter to skip]", default="")
+            "Which contract do you want to update ? [Enter to skip]", default="", show_default=False)
         if id == "":
             return
         while not id.isdigit() or int(id) not in contract_ids:
             click.echo("Invalid id.")
             id = click.prompt(
-                "Which contract do you want to update ? [Enter to skip]",
+                "Which contract do you want to update ? [Enter to skip]", show_default=False,
                 default="")
             if id == "":
                 return
@@ -117,7 +117,8 @@ class ContractView:
                                             default=contract.is_signed)
 
         new_commercial_id = UserView.ask_change_sales_rep(contract, sales_reps)
-        contract.commercial_id = new_commercial_id
+        if new_commercial_id:
+            contract.commercial_id = new_commercial_id
 
         return contract
 
@@ -140,3 +141,8 @@ class ContractView:
     @staticmethod
     def message_no_contract():
         click.echo("Found no contract.")
+
+    @staticmethod
+    def message_action_not_permitted():
+        click.echo(
+            "Only members of the Sales team are allowed to update a contract.")

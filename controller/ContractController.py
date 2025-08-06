@@ -1,6 +1,7 @@
 from datetime import date
 
 from models import Contract, Event, User, Team
+from utils.TokenManagement import TokenManagement
 from views.ContractView import ContractView
 from views.UserView import UserView
 from controller.EventController import EventController
@@ -13,7 +14,7 @@ class ContractController:
         self.session = ctx.obj["session"]
         self.SECRET_KEY = ctx.obj["SECRET_KEY"]
 
-    def display_all_contracts(self):
+    def list_contracts(self):
         contracts = self.session.query(Contract).all()
         self.view.show_contracts(contracts)
         return contracts
@@ -43,8 +44,8 @@ class ContractController:
         if not event or not event.client or not event.client.commercial:
             self.view.message_invalid_event()
             return
-        contract_data["commercial_id"] = event.client.commercial.id
 
+        contract_data["commercial_id"] = event.client.commercial_id
         new_contract = Contract(
             total_amount=contract_data["total_amount"],
             remaining_amount=contract_data["remaining_amount"],
@@ -62,9 +63,40 @@ class ContractController:
 
         self.view.message_contract_added()
 
+    def list_unpaid_contracts(self):
+        unpaid_contracts = self.session.query(Contract).filter(Contract.remaining_amount!=0).all()
+        self.view.show_contracts(unpaid_contracts)
+
+    def list_unsigned_contracts(self):
+        # Récupérer les contrats sans signature dans la base de données
+        unsigned_contracts = self.session.query(Contract).filter_by(is_signed=False).all()
+        # Afficher les contrats non signés
+        self.view.show_contracts(unsigned_contracts)
+
     def update_contract(self):
-        # Afficher tous les contrats
-        contracts = self.display_all_contracts()
+        # Si l'utilisateur est commercial afficher uniquement ses contrats
+        # Sinon s'il est de l'équipe de gestion afficher tous les contrats
+        user = TokenManagement.get_connected_user(self.session,
+                                                  self.SECRET_KEY)
+        # Vérifier qu'il est commercial, qu'il a le droit
+        # Récupérer l'id de l'équipe du commercial
+        sales_rep_team_id = self.session.query(Team).filter(
+            Team.name == "Commercial").first().id
+        management_team_id = self.session.query(Team).filter(
+            Team.name == "Gestion").first().id
+
+        if user.team_id == sales_rep_team_id:
+            # Chercher les contrats du commercial connecté dans la base
+            contracts = self.session.query(Contract).filter(
+                Contract.commercial_id == user.id).all()
+            self.view.show_contracts(contracts)
+        elif user.team_id == management_team_id:
+            # Afficher tous les contrats
+            contracts = self.list_contracts()
+        else:
+            self.view.message_action_not_permitted()
+            return
+
         if not contracts:
             self.view.message_no_contract()
             return
@@ -87,13 +119,3 @@ class ContractController:
         contract = self.view.get_contract_new_data(contract, sales_rep)
         # Le mettre en base
         self.session.commit()
-
-    def list_unpaid_contracts(self):
-        unpaid_contracts = self.session.query(Contract).filter(Contract.remaining_amount!=0).all()
-        self.view.show_contracts(unpaid_contracts)
-
-    def list_unsigned_contracts(self):
-        # Récupérer les contrats sans signature dans la base de données
-        unsigned_contracts = self.session.query(Contract).filter_by(is_signed=False).all()
-        # Afficher les contrats non signés
-        self.view.show_contracts(unsigned_contracts)

@@ -13,6 +13,7 @@ SALES_PERMISSIONS = all_permissions + \
                         "update-my-client",
                         "list-filtered-contracts",
                         "update-my-contracts",
+                        "update-contract",
                         "create-event-for-my-client",
                         "list-unsigned-contracts",
                         "list-unpaid-contracts"
