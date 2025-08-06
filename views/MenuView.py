@@ -54,6 +54,8 @@ class MenuView:
         click.echo("update-my-event")
         click.echo("list-clients")
         click.echo("list-contracts")
+        click.echo("list-unpaid-contracts")
+        click.echo("list-unsigned-contracts")
         click.echo("list-events")
         click.echo("logout")
 

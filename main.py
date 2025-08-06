@@ -182,6 +182,18 @@ def create_event_for_my_client(ctx):
     controller = EventController(ctx)
     controller.create_event_for_my_client()
 
+@cli.command()
+@click.pass_context
+def list_unpaid_contracts(ctx):
+    controller = ContractController(ctx)
+    controller.list_unpaid_contracts()
+
+@cli.command()
+@click.pass_context
+def list_unsigned_contracts(ctx):
+    controller = ContractController(ctx)
+    controller.list_unsigned_contracts()
+
 # --------------------------------------------------------
     # Main
 # --------------------------------------------------------

@@ -8,7 +8,10 @@ from views.UserView import UserView
 class ContractView:
 
     @staticmethod
-    def show_all_contracts(contracts):
+    def show_contracts(contracts):
+        if len(contracts) == 0:
+            click.echo("No contracts found.")
+            return
         row_format = "{:<5} {:<15} {:<20} {:<12} {:<10} {:<12}"
         headers = (
             "Id", "Total Amount", "Remaining Amount", "Date", "Signed",

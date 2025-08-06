@@ -4,6 +4,7 @@ from models import Contract, Event, User, Team
 from views.ContractView import ContractView
 from views.UserView import UserView
 from controller.EventController import EventController
+from types import SimpleNamespace
 
 class ContractController:
 
@@ -14,7 +15,7 @@ class ContractController:
 
     def display_all_contracts(self):
         contracts = self.session.query(Contract).all()
-        self.view.show_all_contracts(contracts)
+        self.view.show_contracts(contracts)
         return contracts
 
     def get_contracts_ids(self, contracts):
@@ -25,7 +26,8 @@ class ContractController:
 
     def create_contract(self):
         # Récupérer les événements et les clients associés
-        event_controller = EventController(self.session, self.SECRET_KEY)
+        ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
+        event_controller = EventController(SimpleNamespace(obj=ctx))
         # Afficher les événements avec le nom du client
         events = event_controller.get_all_events()
         event_ids = event_controller.get_event_ids_without_contract(events)
@@ -38,7 +40,7 @@ class ContractController:
         contract_data = self.view.get_new_contract_data()
         # Récupérer le commercial associé à l'événement en récupérant le client
         event = next((e for e in events if e.id == event_id), None)
-        if not event:
+        if not event or not event.client or not event.client.commercial:
             self.view.message_invalid_event()
             return
         contract_data["commercial_id"] = event.client.commercial.id
@@ -85,3 +87,13 @@ class ContractController:
         contract = self.view.get_contract_new_data(contract, sales_rep)
         # Le mettre en base
         self.session.commit()
+
+    def list_unpaid_contracts(self):
+        unpaid_contracts = self.session.query(Contract).filter(Contract.remaining_amount!=0).all()
+        self.view.show_contracts(unpaid_contracts)
+
+    def list_unsigned_contracts(self):
+        # Récupérer les contrats sans signature dans la base de données
+        unsigned_contracts = self.session.query(Contract).filter_by(is_signed=False).all()
+        # Afficher les contrats non signés
+        self.view.show_contracts(unsigned_contracts)
