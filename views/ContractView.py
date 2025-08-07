@@ -68,12 +68,6 @@ class ContractView:
         contract = {}
         click.echo("Enter new contract informations :")
         contract["total_amount"], contract["remaining_amount"] = ContractView.ask_amounts()
-        pattern = r"^0[1-9](\d{2}){4}$"
-        phone = click.prompt("Phone")
-        while not re.match(pattern,phone):
-            click.echo("The phone number is not valid.")
-            phone = click.prompt("Phone")
-        contract["phone"] = phone
         contract["is_signed"] = click.confirm("Is it signed?", default=False)
 
         return contract

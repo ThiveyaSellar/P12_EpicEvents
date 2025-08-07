@@ -26,12 +26,6 @@ class EventController:
         self.view.show_support_events(events)
         return events
 
-    def get_event_ids(self, events):
-        event_ids = []
-        for event in events:
-            event_ids.append(event.id)
-        return event_ids
-
     def get_event_ids_without_contract(self, events):
         event_ids = []
         for event in events:
@@ -43,7 +37,7 @@ class EventController:
         # Afficher tous les événements de l'utilisateur support
         events = self.display_support_events()
         # Récupérer tous les ids des événements
-        event_ids = self.get_event_ids(events)
+        event_ids = get_ids(events)
         # Demander de choisir un événement
         id = self.view.get_updating_event(event_ids)
         # Récupérer l'objet dans la base

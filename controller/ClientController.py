@@ -2,6 +2,7 @@ from datetime import date
 from models import Client, User, Team
 from views.ClientView import ClientView
 from utils.TokenManagement import TokenManagement
+from utils.helpers import get_ids
 
 
 class ClientController:
@@ -51,17 +52,13 @@ class ClientController:
         self.view.show_sales_clients(clients)
         return clients
 
-    def get_clients_ids(self, clients):
-        client_ids = []
-        for client in clients:
-            client_ids.append(int(client.id))
-        return client_ids
+
 
     def update_client(self):
         # Afficher tous les clients de l'utilisateur commercial
         clients = self.display_sales_clients()
         # Récupérer tous les ids des clients
-        clients_ids = self.get_clients_ids(clients)
+        clients_ids = get_ids(clients)
         # Demander de choisir un client
         id = self.view.get_updating_client(clients_ids)
         if not id:

@@ -77,7 +77,8 @@ class EventView:
         event.address = click.prompt("Address", default=event.address)
         event.nb_attendees = click.prompt("Number of attendees",
                                           default=event.nb_attendees, type=int)
-        event.notes = click.prompt("Notes", default=event.notes)
+        # event.notes = click.prompt("Notes", default=event.notes)
+        event.notes = EventView.ask_notes(event.notes)
 
         return event
 
@@ -143,10 +144,12 @@ class EventView:
         click.echo("Take or edit notes in the editor and close the window")
         notes = click.edit(default_notes)
         if notes is not None:
-            click.echo(notes)
             notes = notes.strip()
+            # Si inchangé, on garde l'ancien texte
+            if default_notes is not None and notes == default_notes.strip():
+                return default_notes.strip()
         else:
-            notes = ""
+            notes = default_notes.strip() if default_notes else ""
         return notes
 
     @staticmethod

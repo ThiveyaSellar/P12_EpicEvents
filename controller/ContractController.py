@@ -1,9 +1,9 @@
 from datetime import date
 
-from models import Contract, Event, User, Team
+from models import Contract, User, Team
 from utils.TokenManagement import TokenManagement
+from utils.helpers import get_ids
 from views.ContractView import ContractView
-from views.UserView import UserView
 from controller.EventController import EventController
 from types import SimpleNamespace
 
@@ -18,12 +18,6 @@ class ContractController:
         contracts = self.session.query(Contract).all()
         self.view.show_contracts(contracts)
         return contracts
-
-    def get_contracts_ids(self, contracts):
-        contract_ids = []
-        for contract in contracts:
-            contract_ids.append(int(contract.id))
-        return contract_ids
 
     def create_contract(self):
         # Récupérer les événements et les clients associés
@@ -101,7 +95,7 @@ class ContractController:
             self.view.message_no_contract()
             return
         # Récupérer tous les ids des contracts
-        contracts_ids = self.get_contracts_ids(contracts)
+        contracts_ids = get_ids(contracts)
         # Demander de choisir un contrat
         id = self.view.get_updating_contract(contracts_ids)
         if not id:

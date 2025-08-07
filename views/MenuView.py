@@ -34,42 +34,51 @@ class MenuView:
             MenuView.error_message_invalid_cmd()
 
     @staticmethod
-    def show_support_menu():
-        click.echo(f"------------- Support menu -------------")
-        click.echo("list-my-events")
-        click.echo("update-my-event")
+    def show_sales_menu():
+        click.echo(f"------------- Sales menu -------------")
+        # Client
         click.echo("list-clients")
+        click.echo("create-my-client")
+        click.echo("update-my-client")
+        # Contract
         click.echo("list-contracts")
+        click.echo("update-contract")
+        click.echo("list-unpaid-contracts")
+        click.echo("list-unsigned-contracts")
+        # Event
         click.echo("list-events")
+        click.echo("create-event-for-my-client")
+
         click.echo("logout")
 
     @staticmethod
-    def show_sales_menu():
-        click.echo(f"------------- Sales menu -------------")
-        click.echo("create-my-client")
-        click.echo("update-my-client")
-        click.echo("list-specific-contracts")
-        click.echo("update-my-contracts")
-        click.echo("update-contract")
-        click.echo("create-event-for-my-client")
-        click.echo("update-my-event")
-        click.echo("list-clients")
-        click.echo("list-contracts")
-        click.echo("list-unpaid-contracts")
-        click.echo("list-unsigned-contracts")
+    def show_support_menu():
+        click.echo(f"------------- Support menu -------------")
+        # Event
         click.echo("list-events")
+        click.echo("list-my-events")
+        click.echo("update-my-event")
+        # Client
+        click.echo("list-clients")
+        # Contract
+        click.echo("list-contracts")
         click.echo("logout")
 
     @staticmethod
     def show_management_menu():
         click.echo(f"------------- Management menu -------------")
+        # Co-worker
+        click.echo("list-co-workers")
         click.echo("create-co-worker")
         click.echo("update-co-worker")
         click.echo("delete-co-worker")
+        # Contract
+        click.echo("list-contracts")
         click.echo("create-contract")
         click.echo("update-contract")
+        # Client
         click.echo("list-clients")
-        click.echo("list-contracts")
+        # Event
         click.echo("list-events")
         click.echo("list-events-without-support")
         click.echo("list-events-without-contract")

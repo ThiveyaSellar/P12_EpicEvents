@@ -5,6 +5,7 @@ from sqlalchemy import func
 
 from models import User, Team, Client, Contract, Event
 from utils.TokenManagement import TokenManagement
+from utils.helpers import get_ids
 from views.UserView import UserView
 
 class UserController:
@@ -56,17 +57,11 @@ class UserController:
         self.view.show_co_workers(co_workers)
         return co_workers
 
-    def get_co_workers_ids(self, co_workers):
-        co_workers_ids = []
-        for co_worker in co_workers:
-            co_workers_ids.append(co_worker.id)
-        return co_workers_ids
-
     def select_co_worker(self, action_name):
         # Afficher tous les collaborateurs
         co_workers = self.display_co_workers()
         # Récupérer les IDs
-        co_workers_ids = self.get_co_workers_ids(co_workers)
+        co_workers_ids = get_ids(co_workers)
         # Demander de choisir un collaborateur selon l'action
         id = self.view.get_co_worker(co_workers_ids, action_name)
         # Retourner l'objet User

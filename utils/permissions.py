@@ -11,8 +11,6 @@ SALES_PERMISSIONS = all_permissions + \
                     [
                         "create-my-client",
                         "update-my-client",
-                        "list-filtered-contracts",
-                        "update-my-contracts",
                         "update-contract",
                         "create-event-for-my-client",
                         "list-unsigned-contracts",
@@ -27,6 +25,7 @@ SUPPORT_PERMISSIONS = all_permissions + \
 
 MANAGEMENT_PERMISSIONS = all_permissions + \
                          [
+                             "list-co-workers",
                              "create-co-worker",
                              "update-co-worker",
                              "delete-co-worker",
@@ -45,3 +44,10 @@ PERMISSIONS = {
 
 def is_authorized(team, command, permissions):
     return command in permissions.get(team, [])
+
+def command_exists(command):
+    for role in PERMISSIONS:
+        permissions = PERMISSIONS[role]
+        if command in permissions:
+            return True
+    return False

@@ -63,6 +63,13 @@ def logout(ctx):
 
 @cli.command()
 @click.pass_context
+def exit(ctx):
+    controller = LoginController(ctx)
+    controller.exit_program()
+    sys.exit()
+
+@cli.command()
+@click.pass_context
 def list_clients(ctx):
     controller = ClientController(ctx)
     controller.get_all_clients()
@@ -98,6 +105,12 @@ def update_my_event(ctx):
 # --------------------------------------------------------
     # Management
 # --------------------------------------------------------
+
+@cli.command()
+@click.pass_context
+def list_co_workers(ctx):
+    controller = UserController(ctx)
+    controller.display_co_workers()
 
 @cli.command()
 @click.pass_context
@@ -153,6 +166,7 @@ def list_events_without_contract(ctx):
 def add_support_collab_to_event(ctx):
     controller = EventController(ctx)
     controller.add_support_collab_to_event()
+
 # --------------------------------------------------------
     # Commercial
 # --------------------------------------------------------
@@ -171,13 +185,6 @@ def update_my_client(ctx):
 
 @cli.command()
 @click.pass_context
-def exit(ctx):
-    controller = LoginController(ctx)
-    controller.exit_program()
-    sys.exit()
-
-@cli.command()
-@click.pass_context
 def create_event_for_my_client(ctx):
     controller = EventController(ctx)
     controller.create_event_for_my_client()
@@ -193,12 +200,6 @@ def list_unpaid_contracts(ctx):
 def list_unsigned_contracts(ctx):
     controller = ContractController(ctx)
     controller.list_unsigned_contracts()
-
-@cli.command()
-@click.pass_context
-def update_my_contracts(ctx):
-    controller = ContractController(ctx)
-    controller.sales_rep_update_assigned_contracts()
 
 # --------------------------------------------------------
     # Main

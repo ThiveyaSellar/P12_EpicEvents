@@ -1,5 +1,5 @@
 from views.MenuView import MenuView
-from utils.permissions import is_authorized, PERMISSIONS
+from utils.permissions import is_authorized, command_exists, PERMISSIONS
 from utils.TokenManagement import TokenManagement
 
 
@@ -42,13 +42,18 @@ class MenuController:
                 cmd_parts = cmd.split()
                 command = cmd_parts[0] if cmd_parts else ""
 
-                if is_authorized(team, command, PERMISSIONS):
-                    cli.main(cmd_parts, standalone_mode=False)
-                elif command == "":
+                if not command:
                     print("Veuillez saisir une commande.")
+                elif command in ["login", "register"]:
+                    self.view.print_error_message(
+                        "Vous êtes déjà connecté. Veuillez vous déconnecter pour utiliser cette commande.")
+                elif not command_exists(command):
+                    self.view.print_error_message("Commande inexistante.")
+                elif is_authorized(team, command, PERMISSIONS):
+                    cli.main(cmd_parts, standalone_mode=False)
                 else:
                     self.view.print_error_message(
-                        f"Commande non autorisée pour l’équipe {team}")
+                        f"Commande non autorisée pour l’équipe {team}.")
             except Exception as e:
                 self.view.print_error_message(e)
                 break
