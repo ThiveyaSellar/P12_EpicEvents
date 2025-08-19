@@ -2,7 +2,8 @@ from datetime import date
 
 from models import Contract, User, Team
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids
+from utils.helpers import get_ids, check_field_and_length, check_email_field, \
+    check_phone_field, check_date_field
 from views.ContractView import ContractView
 from controller.EventController import EventController
 from types import SimpleNamespace
@@ -19,6 +20,29 @@ class ContractController:
         self.view.show_contracts(contracts)
         return contracts
 
+    def validate_contract_data(self, data):
+        # Vérifier les données dans le dictionnaire data
+        errors = []
+        total_amount = data.get("total_amount")
+        if total_amount is None:
+            errors.append("Total amount is required.")
+        elif not isinstance(total_amount,int) or total_amount <= 0:
+            errors.append("Total amount must be an int greater than 0.")
+
+        remaining_amount = data.get("remaining_amount")
+        if remaining_amount is not None:
+            if not isinstance(remaining_amount, int) or remaining_amount < 0:
+                errors.append("Remaining amount must be an int greater than 0.")
+            elif remaining_amount > total_amount:
+                errors.append("Remaining amount can't be greater than total amount.")
+
+        if "is_signed" not in data:
+            errors.append("L'état de signature est obligatoire.")
+        elif not isinstance(data["is_signed"], bool):
+            errors.append("Le champ 'is_signed' doit être un booléen.")
+
+        return errors
+
     def create_contract(self):
         # Récupérer les événements et les clients associés
         ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
@@ -33,13 +57,19 @@ class ContractController:
         event_id = self.view.select_event_for_contract(event_ids)
         # Récupérer les informations du contrat
         contract_data = self.view.get_new_contract_data()
+        errors = self.validate_contract_data(contract_data)
+        if errors:
+            self.view.message_adding_contract_failed(errors)
+            return
         # Récupérer le commercial associé à l'événement en récupérant le client
         event = next((e for e in events if e.id == event_id), None)
-        if not event or not event.client or not event.client.commercial:
+
+        if not event:
             self.view.message_invalid_event()
             return
 
-        contract_data["commercial_id"] = event.client.commercial_id
+        # S'il n'y a pas de commercial associé au client, le commercial n'est pas attaché au contrat
+        contract_data["commercial_id"] = event.client.commercial_id if event.client.commercial else None
         new_contract = Contract(
             total_amount=contract_data["total_amount"],
             remaining_amount=contract_data["remaining_amount"],
@@ -111,5 +141,18 @@ class ContractController:
         )
         # Le modifier
         contract = self.view.get_contract_new_data(contract, sales_rep)
+        data = {
+            "total_amount": contract.total_amount,
+            "remaining_amount": contract.remaining_amount,
+            "is_signed": contract.is_signed,
+            "commercial_id": contract.commercial_id
+        }
+        errors = self.validate_contract_data(data)
+        if data["commercial_id"] is not None and data["commercial_id"] not in get_ids(sales_rep):
+            errors.append("Commercial_id is not valid.")
+        if errors:
+            self.view.message_updating_contract_failed(errors)
+            return
         # Le mettre en base
         self.session.commit()
+        self.view.message_contract_updated()

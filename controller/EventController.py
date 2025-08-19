@@ -3,7 +3,8 @@ from controller.UserController import UserController
 from models import Event, Team
 from views.EventView import EventView
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids
+from utils.helpers import get_ids, check_field_and_length, check_date_field, \
+    check_number_field, check_field_length
 from types import SimpleNamespace
 
 
@@ -42,10 +43,35 @@ class EventController:
         id = self.view.get_updating_event(event_ids)
         # Récupérer l'objet dans la base
         event = self.session.query(Event).filter(Event.id==id).first()
+        # Récupérer les nouvelles données dans un dictionnaire
         # Le modifier
         event = self.view.get_event_new_data(event)
+        data = {
+            "name": event.name,
+            "start_date": event.start_date,
+            "end_date": event.end_date,
+            "address": event.address,
+            "nb_attendees": event.nb_attendees,
+            "notes": event.notes
+        }
+        errors = self.validate_event_data(data)
+        if errors:
+            self.view.message_updating_event_failed(errors)
+            return
         # Le mettre en base
         self.session.commit()
+        self.view.message_event_updated()
+
+    def validate_event_data(self, data):
+        errors = []
+        check_field_and_length(data, "name", 100, errors)
+        check_date_field(data, "start_date", errors)
+        check_date_field(data, "end_date", errors)
+        check_field_length(data, "address", 100, errors)
+        check_number_field(data, "nb_attendees", errors)
+        check_field_length(data, "notes", 100, errors)
+        return errors
+
 
     def create_event_for_my_client(self):
         # Afficher mes clients
@@ -56,6 +82,10 @@ class EventController:
         # Demander de choisir un client par l'id
         client_id = self.view.select_client_for_event(clients_ids)
         event_data = self.view.get_new_event_data()
+        errors = self.validate_event_data(event_data)
+        if errors:
+            self.view.message_adding_event_failed(errors)
+            return
         support_agents = user_controller.get_employees_from_team("Support")
         support_ids = get_ids(support_agents)
         support_id = self.view.select_support_for_event(support_ids)
@@ -73,6 +103,7 @@ class EventController:
         )
         self.session.add(new_event)
         self.session.commit()
+        self.view.message_event_added()
 
     def list_events_without_support(self):
         # Chercher les événements en base sans collaborateur

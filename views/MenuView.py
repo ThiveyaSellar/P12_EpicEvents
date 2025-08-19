@@ -4,15 +4,44 @@ class MenuView:
 
     @staticmethod
     def ask_cmd_input():
-        return input("Commande > ").strip().lower()
+        return input("Command > ").strip().lower()
 
     @staticmethod
-    def error_message_invalid_cmd():
-        click.echo("Commande invalide, veuillez réessayer.")
+    def message_already_connected():
+        click.echo("You are already logged. Please log out before using this command.")
+
+    @staticmethod
+    def message_input_command():
+        click.echo("Enter a command.")
+
+    @staticmethod
+    def message_invalid_cmd():
+        click.echo("Invalid command, please try again.")
+
+    @staticmethod
+    def message_inexistant_cmd():
+        click.echo("Inexistant command, please try again.")
+
+    @staticmethod
+    def message_unauthorized_cmd(team):
+        click.echo(f"Commande non autorisée pour l’équipe {team}.")
 
     @staticmethod
     def msg_user_none():
-        click.echo("Utilisateur inconnu, fin du programme!")
+        click.echo("Unknown user, exiting!")
+
+    @staticmethod
+    def print_connection_error():
+        click.echo("Veuillez vous reconnecter.")
+
+    @staticmethod
+    def print_error_message(message):
+        click.echo(message)
+
+    @staticmethod
+    def logout_message():
+        click.echo("Logging out. Returning to the login menu...")
+
 
     @staticmethod
     def print_login_menu():
@@ -31,7 +60,7 @@ class MenuView:
             cmd = MenuView.ask_cmd_input()
             if cmd in options:
                 return cmd
-            MenuView.error_message_invalid_cmd()
+            MenuView.message_invalid_cmd()
 
     @staticmethod
     def show_sales_menu():
@@ -91,11 +120,3 @@ class MenuView:
         click.echo("list-clients")
         click.echo("list-events")
         click.echo("logout")
-
-    @staticmethod
-    def print_error_message(message):
-        click.echo(message)
-
-    @staticmethod
-    def logout_message():
-        click.echo("Déconnexion. Retour au menu de connexion...")

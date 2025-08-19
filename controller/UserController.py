@@ -5,7 +5,8 @@ from sqlalchemy import func
 
 from models import User, Team, Client, Contract, Event
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids
+from utils.helpers import get_ids, check_email_field, check_field_and_length, \
+    check_phone_field, check_team_field
 from views.UserView import UserView
 
 class UserController:
@@ -25,6 +26,16 @@ class UserController:
         ph = PasswordHasher()
         return ph.hash(password)
 
+    def validate_user_data(self, data):
+        errors = []
+        check_email_field(data, errors)
+        check_field_and_length(data, "first_name", 100, errors)
+        check_field_and_length(data, "last_name", 100, errors)
+        check_phone_field(data, errors)
+        check_team_field(data, errors)
+
+        return errors
+
     def create_co_worker(self, email, first_name, last_name, phone, team):
 
         # Générer un mot de passe basique, l'utilisateur devra le changer
@@ -35,6 +46,18 @@ class UserController:
 
         # Récupérer l'id de l'équipe
         team_id = self.session.query(Team).filter_by(name=team).first().id
+
+        user_data = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone": phone,
+            "team": team
+        }
+        errors = self.validate_user_data(user_data)
+        if errors:
+            self.view.message_adding_co_worker_failed(errors)
+            return
 
         # Création de l'utilisateur
         new_user = User(
@@ -73,6 +96,16 @@ class UserController:
         teams = (self.session.query(Team).all())
         # Le modifier
         co_worker = self.view.get_co_worker_new_data(co_worker, teams)
+        data = {
+            "first_name": co_worker.first_name,
+            "last_name": co_worker.last_name,
+            "email": co_worker.email_address,
+            "phone": co_worker.phone
+        }
+        errors = self.validate_user_data(data)
+        if errors:
+            self.view.message_updating_co_worker_failed(errors)
+            return
         # Le mettre en base
         self.session.commit()
 

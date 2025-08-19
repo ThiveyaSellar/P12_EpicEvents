@@ -1,7 +1,10 @@
 import jwt, os
 from argon2 import PasswordHasher
 
+from controller.UserController import UserController
 from models import User, Team
+from utils.helpers import check_email_field, check_field_and_length, \
+    check_phone_field, check_team_field
 from views.RegisterView import RegisterView
 from utils.validators import validate_password
 
@@ -34,6 +37,16 @@ class RegisterController:
         user = self.session.query(User).filter_by(email_address=email).first()
         return user is not None
 
+    def validate_user_data(self, data):
+        errors = []
+        check_email_field(data, errors)
+        check_field_and_length(data, "first_name", 100, errors)
+        check_field_and_length(data, "last_name", 100, errors)
+        check_phone_field(data, errors)
+        check_team_field(data, errors)
+
+        return errors
+
     def register(self, email, password, password2, first_name, last_name, phone, team):
 
         if self.email_exists_in_db(email):
@@ -50,6 +63,17 @@ class RegisterController:
         # Récupérer l'id de l'équipe
         team_id = self.session.query(Team).filter_by(name=team).first().id
 
+        user_data = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone": phone,
+            "team": team
+        }
+        errors = self.validate_user_data(user_data)
+        if errors:
+            self.view.message_registration_failed(errors)
+            return
         # Création de l'utilisateur
         new_user = User(
             password=hashed_password,

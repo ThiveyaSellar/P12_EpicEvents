@@ -54,12 +54,21 @@ class ContractView:
             total_amount = click.prompt("Total amount", type=int,
                                         default=total_default,
                                         show_default=total_default is not None)
+            if total_amount <= 0:
+                click.echo("Total amount must be greater than 0.")
+                continue
             remaining_amount = click.prompt("Remaining amount", type=int,
                                             default=remaining_default,
                                             show_default=remaining_default is not None)
-            if remaining_amount <= total_amount:
+            if remaining_amount <= 0:
+                click.echo("Remaining amount must be greater than or equal to 0.")
+                continue
+            if remaining_amount <= total_amount and total_amount > 0:
                 break
-            click.echo("Remaining amount must be less than or equal to total amount. Please try again.")
+            if remaining_amount > total_amount:
+                click.echo("Remaining amount must be less than or equal to total amount. Please try again.")
+                continue
+            click.echo("Please try again.")
         return total_amount, remaining_amount
 
     @staticmethod
@@ -121,12 +130,22 @@ class ContractView:
         click.echo("All events have already a contract.")
 
     @staticmethod
-    def message_adding_contract_failed():
+    def message_adding_contract_failed(errors):
         click.echo("Contract has not been added.")
+        click.echo(errors)
+
+    @staticmethod
+    def message_updating_contract_failed(errors):
+        click.echo("Contract has not been updated.")
+        click.echo(errors)
 
     @staticmethod
     def message_contract_added():
         click.echo("Contract has been added.")
+
+    @staticmethod
+    def message_contract_added():
+        click.echo("Contract has been updated.")
 
     @staticmethod
     def message_invalid_event():

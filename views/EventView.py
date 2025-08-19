@@ -167,3 +167,21 @@ class EventView:
     @staticmethod
     def message_event_not_found():
         click.echo("Event not found.")
+
+    @staticmethod
+    def message_adding_event_failed(errors):
+        click.echo("Adding event failed...")
+        click.echo(errors)
+
+    @staticmethod
+    def message_updating_event_failed(errors):
+        click.echo("Updating event failed...")
+        click.echo(errors)
+
+    @staticmethod
+    def message_event_added():
+        click.echo("New event added.")
+
+    @staticmethod
+    def message_event_updated():
+        click.echo("Event updated.")

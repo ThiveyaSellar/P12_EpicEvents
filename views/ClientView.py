@@ -45,8 +45,10 @@ class ClientView:
         click.echo("Client has been added.")
 
     @staticmethod
-    def message_adding_client_failed():
+    def message_adding_client_failed(errors=""):
         click.echo("Client has not been added.")
+        if errors:
+            click.echo(errors)
        
     @staticmethod 
     def show_sales_clients(clients):
@@ -96,13 +98,12 @@ class ClientView:
         click.echo(
             "Enter new data or press [Enter] to keep the current value:")
         # Pour chaque champ, on propose la valeur actuelle
-        client.first_name = click.prompt("Client first name", default=client.first_name)
-        client.last_name = click.prompt("Client last name",
+        client.first_name = click.prompt("First name", default=client.first_name)
+        client.last_name = click.prompt("Last name",
                                          default=client.last_name)
-        client.email_address = click.prompt("Email",
-                                        default=client.email_address)
-        client.phone = click.prompt("Ending date", default=client.phone)
-        client.company = click.prompt("Address", default=client.company)
+        client.email_address= click.prompt("Email address", default=client.email_address, value_proc=validate_email)
+        client.phone = click.prompt("Phone", default=client.phone, value_proc=validate_phone)
+        client.company = click.prompt("Company name", default=client.company)
 
         new_commercial_id = UserView.ask_change_sales_rep(client, sales_reps)
         client.commercial_id = new_commercial_id

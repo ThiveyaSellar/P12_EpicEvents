@@ -181,3 +181,13 @@ class UserView:
             click.echo("Invalid ID. Please choose a valid ID from the list.")
             support_id = str(click.prompt("Which support co_worker do you want to add to the event ? "))
         return support_id
+
+    @staticmethod
+    def message_adding_co_worker_failed(errors):
+        click.echo("Co-worker has not been added.")
+        click.echo(errors)
+
+    @staticmethod
+    def message_updating_co_worker_failed(errors):
+        click.echo("Co-worker has not been updated.")
+        click.echo(errors)

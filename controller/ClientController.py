@@ -2,7 +2,8 @@ from datetime import date
 from models import Client, User, Team
 from views.ClientView import ClientView
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids
+from utils.helpers import get_ids, check_field_and_length, check_email_field, \
+    check_phone_field
 
 
 class ClientController:
@@ -17,11 +18,26 @@ class ClientController:
         self.view.show_all_clients(clients)
         return clients
 
+    def validate_client_data(self, data):
+        errors = []
+        check_field_and_length(data, "first_name", 100, errors)
+        check_field_and_length(data, "last_name", 100, errors)
+        check_field_and_length(data, "company", 100, errors)
+        check_email_field(data, errors)
+        check_phone_field(data, errors)
+        return errors
+
     def create_client(self):
         client_data = self.view.get_new_client_data()
+        # Valider les données saisies par l'utilisateur
+        errors = self.validate_client_data(client_data)
+        if errors:
+            self.view.message_adding_client_failed(errors)
+            return
         # Get current commercial user id
         user = TokenManagement.get_connected_user(self.session,
                                                   self.SECRET_KEY)
+
         new_client = Client(
             first_name=client_data["first_name"],
             last_name=client_data["last_name"],
@@ -35,8 +51,7 @@ class ClientController:
         self.session.add(new_client)
         self.session.commit()
         # Vérification si le client a été ajouté
-        added_client = self.session.query(Client).filter_by(
-            id=new_client.id).first()
+        added_client = self.session.query(Client).filter_by(id=new_client.id).first()
 
         if added_client:
             self.view.message_client_added()
@@ -51,8 +66,6 @@ class ClientController:
             Client.commercial.has(id=user.id)).all()
         self.view.show_sales_clients(clients)
         return clients
-
-
 
     def update_client(self):
         # Afficher tous les clients de l'utilisateur commercial
@@ -74,6 +87,18 @@ class ClientController:
         )
         # Le modifier
         client = self.view.get_client_new_data(client, sales_rep)
+        data = {
+            "first_name": client.first_name,
+            "last_name": client.last_name,
+            "email_address": client.email_address,
+            "phone": client.phone,
+            "company": client.company
+        }
+        errors = self.validate_client_data(data)
+
+        if errors:
+            self.view.message_adding_client_failed(errors)
+            return
         client.last_update=date.today()
         # Le mettre en base
         self.session.commit()
