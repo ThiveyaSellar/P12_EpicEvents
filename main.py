@@ -15,6 +15,10 @@ from controller.ClientController import ClientController
 from controller.EventController import EventController
 from controller.ContractController import ContractController
 
+from commands.support import register_support_commands
+from commands.sales_rep import register_sales_rep_commands
+from commands.management import register_management_commands
+
 from settings import Settings
 
 settings = Settings()
@@ -28,6 +32,10 @@ def cli(ctx):
         ctx.obj = {}
     ctx.obj["session"] = session
     ctx.obj["SECRET_KEY"] = SECRET_KEY
+
+register_support_commands(cli)
+register_management_commands(cli)
+register_sales_rep_commands(cli)
 
 @cli.command()
 @click.pass_context
@@ -90,7 +98,7 @@ def list_contracts(ctx):
     # Support
 # --------------------------------------------------------
 
-@cli.command()
+"""@cli.command()
 @click.pass_context
 def list_my_events(ctx):
     controller = EventController(ctx)
@@ -100,13 +108,13 @@ def list_my_events(ctx):
 @click.pass_context
 def update_my_event(ctx):
     controller = EventController(ctx)
-    controller.update_support_events()
+    controller.update_support_events()"""
 
 # --------------------------------------------------------
     # Management
 # --------------------------------------------------------
 
-@cli.command()
+"""@cli.command()
 @click.pass_context
 def list_co_workers(ctx):
     controller = UserController(ctx)
@@ -165,13 +173,13 @@ def list_events_without_contract(ctx):
 @click.pass_context
 def add_support_collab_to_event(ctx):
     controller = EventController(ctx)
-    controller.add_support_collab_to_event()
+    controller.add_support_collab_to_event()"""
 
 # --------------------------------------------------------
     # Commercial
 # --------------------------------------------------------
 
-@cli.command()
+"""@cli.command()
 @click.pass_context
 def create_my_client(ctx):
     controller = ClientController(ctx)
@@ -199,7 +207,7 @@ def list_unpaid_contracts(ctx):
 @click.pass_context
 def list_unsigned_contracts(ctx):
     controller = ContractController(ctx)
-    controller.list_unsigned_contracts()
+    controller.list_unsigned_contracts()"""
 
 # --------------------------------------------------------
     # Main
