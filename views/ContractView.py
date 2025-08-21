@@ -86,7 +86,7 @@ class ContractView:
         phone = value
         pattern = r"^0[1-9](\d{2}){4}$"
         if not re.match(pattern, phone):
-            raise click.BadParameter("Le numéro n'est pas valide.")
+            raise click.BadParameter("The phone number start with the digit 0 and must have 10 digits.")
         return phone
 
     @staticmethod
@@ -144,7 +144,7 @@ class ContractView:
         click.echo("Contract has been added.")
 
     @staticmethod
-    def message_contract_added():
+    def message_contract_updated():
         click.echo("Contract has been updated.")
 
     @staticmethod

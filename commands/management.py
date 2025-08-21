@@ -1,5 +1,6 @@
 import click
 
+from controller.ClientController import ClientController
 from controller.ContractController import ContractController
 from controller.EventController import EventController
 from controller.UserController import UserController
@@ -73,3 +74,9 @@ def register_management_commands(cli):
     def add_support_collab_to_event(ctx):
         controller = EventController(ctx)
         controller.add_support_collab_to_event()
+
+    @cli.command()
+    @click.pass_context
+    def add_sales_rep_collab_to_client(ctx):
+        controller = ClientController(ctx)
+        controller.add_sales_rep_collab_to_client()

@@ -1,5 +1,4 @@
-import random
-import string
+import string, logging, random
 from argon2 import PasswordHasher
 from sqlalchemy import func
 
@@ -8,6 +7,7 @@ from utils.TokenManagement import TokenManagement
 from utils.helpers import get_ids, check_email_field, check_field_and_length, \
     check_phone_field, check_team_field
 from views.UserView import UserView
+
 
 class UserController:
 
@@ -72,6 +72,8 @@ class UserController:
         # Enregistrement dans la base de données
         self.session.add(new_user)
         self.session.commit()
+
+        logging.info(f"A new user is created: {first_name} {last_name}")
 
         self.view.success_message(first_name, last_name)
 

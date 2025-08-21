@@ -1,4 +1,7 @@
 from datetime import date
+from types import SimpleNamespace
+
+from controller.UserController import UserController
 from models import Client, User, Team
 from views.ClientView import ClientView
 from utils.TokenManagement import TokenManagement
@@ -102,3 +105,55 @@ class ClientController:
         client.last_update=date.today()
         # Le mettre en base
         self.session.commit()
+
+    def add(self):
+        # Afficher les événements sans supports
+        events = self.list_events_without_support()
+        events_ids = get_ids(events)
+        # Demander l'événement sans support à modifier
+        event_id = self.view.get_updating_event(events_ids)
+        event = self.session.query(Event).filter(Event.id == event_id).first()
+        if not event:
+            self.view.message_event_not_found()
+            return
+        # Afficher les collaborateurs support
+        ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
+        user_controller = UserController(SimpleNamespace(obj=ctx))
+        support_employees = user_controller.get_employees_from_team("Support")
+        support_id = user_controller.view.choose_support_collab(
+            support_employees)
+
+        event.support_id = support_id
+        self.session.commit()
+
+    def add_sales_rep_collab_to_client(self):
+        # Afficher les clients sans commerciaux
+        clients = self.list_clients_without_sales_rep()
+        clients_ids = get_ids(clients)
+        # Demander le client sans commercial à modifier
+        client_id = self.view.get_updating_client(clients_ids)
+        client = self.session.query(Client).filter(Client.id == client_id).first()
+        if not client:
+            self.view.message_client_not_found()
+            return
+        # Afficher les collaborateurs support
+        ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
+        user_controller = UserController(SimpleNamespace(obj=ctx))
+        sales_reps = user_controller.get_employees_from_team("Commercial")
+        sales_rep_id = user_controller.view.choose_support_collab(
+            sales_reps)
+
+        client.commercial_id = sales_rep_id
+        self.session.commit()
+
+    def list_events_without_support(self):
+        # Chercher les événements en base sans collaborateur
+        events_without_support = self.session.query(Event).filter(Event.support_id == None).all()
+        # Afficher les événements
+        self.view.show_events(events_without_support)
+        return events_without_support
+
+    def list_clients_without_sales_rep(self):
+        clients_without_sales_rep = self.session.query(Client).filter(Client.commercial_id == None).all()
+        self.view.show_all_clients(clients_without_sales_rep)
+        return clients_without_sales_rep

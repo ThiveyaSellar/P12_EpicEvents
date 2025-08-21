@@ -1,5 +1,8 @@
 import os, sys, click
+import sentry_sdk
 # Ajouter le répertoire racine au sys.path
+from sentry_sdk.integrations.logging import LoggingIntegration
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '')))
 
 from utils.TokenManagement import TokenManagement
@@ -16,9 +19,29 @@ from commands.auth import register_auth_commands
 
 from settings import Settings
 
+import logging
+
 settings = Settings()
 session = settings.session
 SECRET_KEY = settings.secret_key
+
+sentry_logging = LoggingIntegration(
+    level=logging.INFO,       # Capture les logs INFO et supérieurs
+    event_level=logging.INFO # Crée des événements Sentry pour WARNING et ERROR
+)
+
+sentry_sdk.init(
+    dsn=settings.sentry_dsn,
+    integrations=[sentry_logging],
+    traces_sample_rate=1.0
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 
 @click.group()
 @click.pass_context
@@ -35,6 +58,7 @@ register_sales_rep_commands(cli)
 register_common_commands(cli)
 
 def main():
+
     menu_controller = MenuController()
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
     connected, user = TokenManagement.checking_user_connection(session,

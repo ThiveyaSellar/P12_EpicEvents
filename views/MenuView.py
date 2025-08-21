@@ -1,3 +1,6 @@
+import textwrap
+from sentry_sdk import logger as sentry_logger
+
 import click
 
 class MenuView:
@@ -24,7 +27,7 @@ class MenuView:
 
     @staticmethod
     def message_unauthorized_cmd(team):
-        click.echo(f"Commande non autorisée pour l’équipe {team}.")
+        click.echo(f"Command is unauthorized for the {team} team.")
 
     @staticmethod
     def msg_user_none():
@@ -32,7 +35,7 @@ class MenuView:
 
     @staticmethod
     def print_connection_error():
-        click.echo("Veuillez vous reconnecter.")
+        click.echo("Please login again.")
 
     @staticmethod
     def print_error_message(message):
@@ -45,11 +48,14 @@ class MenuView:
 
     @staticmethod
     def print_login_menu():
-        click.echo("\n------------- Main -------------")
-        click.echo("Please enter a command :")
-        click.echo("1- register")
-        click.echo("2- login")
-        click.echo("3- exit")
+        menu = (
+        "------------- Main -------------\n"
+        "Please enter a command:\n"
+        "register\n"
+        "login\n"
+        "exit"
+        )
+        click.secho(menu, fg="yellow", bold=True)
 
     @staticmethod
     def show_login_menu():
@@ -64,55 +70,64 @@ class MenuView:
 
     @staticmethod
     def show_sales_menu():
-        click.echo(f"------------- Sales menu -------------")
-        # Client
-        click.echo("list-clients")
-        click.echo("create-my-client")
-        click.echo("update-my-client")
-        # Contract
-        click.echo("list-contracts")
-        click.echo("update-contract")
-        click.echo("list-unpaid-contracts")
-        click.echo("list-unsigned-contracts")
-        # Event
-        click.echo("list-events")
-        click.echo("create-event-for-my-client")
-
-        click.echo("logout")
+        menu = textwrap.dedent("""
+            ------------- Sales menu -------------
+            # Client
+            list-clients
+            create-my-client
+            update-my-client
+            # Contract
+            list-contracts
+            update-contract
+            list-unpaid-contracts
+            list-unsigned-contracts
+            # Event
+            list-events
+            create-event-for-my-client
+            logout
+        """)
+        click.secho(menu, fg="yellow", bold=True)
 
     @staticmethod
     def show_support_menu():
-        click.echo(f"------------- Support menu -------------")
-        # Event
-        click.echo("list-events")
-        click.echo("list-my-events")
-        click.echo("update-my-event")
-        # Client
-        click.echo("list-clients")
-        # Contract
-        click.echo("list-contracts")
-        click.echo("logout")
+        menu = textwrap.dedent("""
+            ------------- Support menu -------------
+            # Event
+            list-events
+            list-my-events
+            update-my-event
+            # Client
+            list-clients
+            # Contract
+            list-contracts
+            logout
+        """)
+        click.secho(menu, fg="yellow", bold=True)
 
     @staticmethod
     def show_management_menu():
-        click.echo(f"------------- Management menu -------------")
-        # Co-worker
-        click.echo("list-co-workers")
-        click.echo("create-co-worker")
-        click.echo("update-co-worker")
-        click.echo("delete-co-worker")
-        # Contract
-        click.echo("list-contracts")
-        click.echo("create-contract")
-        click.echo("update-contract")
-        # Client
-        click.echo("list-clients")
-        # Event
-        click.echo("list-events")
-        click.echo("list-events-without-support")
-        click.echo("list-events-without-contract")
-        click.echo("add-support-collab-to-event")
-        click.echo("logout")
+        menu = textwrap.dedent("""
+            ------------- Management menu -------------
+            # Co-worker
+            list-co-workers
+            create-co-worker
+            update-co-worker
+            delete-co-worker
+            # Contract
+            list-contracts
+            create-contract
+            update-contract
+            # Client
+            list-clients
+            add-sales-rep-collab-to-client
+            # Event
+            list-events
+            list-events-without-support
+            list-events-without-contract
+            add-support-collab-to-event
+            logout
+        """)
+        click.secho(menu, fg="yellow", bold=True)
 
     @staticmethod
     def show_main_menu(user, team):

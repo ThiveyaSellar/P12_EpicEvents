@@ -11,8 +11,10 @@ class Settings:
         self.engine = None
         self.conn = None
         self.session = None
+        self.sentry_dsn = None
         self.set_config()
         self.set_database_config()
+        self.set_sentry_config()
         self.get_database_connection()
         self.create_session()
         self.create_tables()
@@ -25,6 +27,9 @@ class Settings:
 
     def set_database_config(self):
         self.database_config = DatabaseConfig(self.config)
+
+    def set_sentry_config(self):
+        self.sentry_dsn = self.config['sentry']['SENTRY_DSN']
 
     def get_database_connection(self):
         # Connexion à la base de données qu'une seule fois

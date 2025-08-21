@@ -3,7 +3,7 @@ import click
 class UserView:
 
     def success_message(self, first_name, last_name):
-        click.echo(f"Inscription réussie pour {first_name} {last_name}.")
+        click.echo(f"Registration is successful for {first_name} {last_name}.")
 
     def show_co_workers(self, co_workers):
         row_format = "{:<10} {:<30} {:<30} {:<15} {:<15}"

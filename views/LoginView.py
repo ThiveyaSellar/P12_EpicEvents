@@ -4,37 +4,42 @@ class LoginView:
 
     @staticmethod
     def print_password_error():
-        click.echo("Mot de passe incorrect.")
+        click.echo("Password is incorrect.")
 
     @staticmethod
     def print_welcome_message(user):
-        click.echo(f"Connexion réussie.\nBienvenue {user.first_name} {user.last_name}!")
+        message = (
+            "--------------------------------------\n"
+            "Successful connection.\n"
+            f"Welcome {user.first_name} {user.last_name}!"
+        )
+        click.echo(message)
 
     @staticmethod
     def print_user_not_found():
-        click.echo("Utilisateur introuvable.")
+        click.echo("User is not found.")
 
     @staticmethod
     def get_logout_confirmation():
         choice = ""
-        while choice not in ("o", "n"):
+        while choice not in ("y", "n"):
             choice = input(
-                "Confirmez-vous votre déconnexion ? (o/n) : ").strip().lower()
-            if choice not in ("o", "n"):
-                print("Veuillez saisir 'o' pour oui ou 'n' pour non.")
+                "Are you confirming your disconnection ? (y/n) : ").strip().lower()
+            if choice not in ("y", "n"):
+                print("Please input 'y' for yes or 'n' for no.")
 
-        return choice == 'o'
+        return choice == 'y'
 
     @staticmethod
     def print_logged_out_message():
-        click.echo("Vous êtes déconnecté.")
+        click.echo("You are disconnected.")
 
     @staticmethod
     def print_staying_logged_message():
-        click.echo("Retour au menu.")
+        click.echo("Back to menu.")
 
     @staticmethod
     def print_exit_message():
-        click.echo("Fin du programme. 'python main.py' pour le relancer.")
+        click.echo("End of the program. 'python main.py' to start again.")
 
 

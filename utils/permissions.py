@@ -33,7 +33,8 @@ MANAGEMENT_PERMISSIONS = all_permissions + \
                              "update-contract",
                              "list-events-without-support",
                              "list-events-without-contract",
-                             "add-support-collab-to-event"
+                             "add-support-collab-to-event",
+                             "add-sales-rep-collab-to-client"
                          ]
 
 PERMISSIONS = {
