@@ -3,6 +3,7 @@ all_permissions = [
     "list-clients",
     "list-contracts",
     "list-events",
+    "change-password",
     "logout",
     "exit"
 ]
@@ -12,15 +13,16 @@ SALES_PERMISSIONS = all_permissions + \
                         "create-my-client",
                         "update-my-client",
                         "update-contract",
+                        "sign-contract",
                         "create-event-for-my-client",
                         "list-unsigned-contracts",
-                        "list-unpaid-contracts"
+                        "list-unpaid-contracts",
                     ]
 
 SUPPORT_PERMISSIONS = all_permissions + \
                       [
                           "update-my-event",
-                          "list-my-events"
+                          "list-my-events",
                       ]
 
 MANAGEMENT_PERMISSIONS = all_permissions + \
@@ -34,7 +36,7 @@ MANAGEMENT_PERMISSIONS = all_permissions + \
                              "list-events-without-support",
                              "list-events-without-contract",
                              "add-support-collab-to-event",
-                             "add-sales-rep-collab-to-client"
+                             "add-sales-rep-collab-to-client",
                          ]
 
 PERMISSIONS = {

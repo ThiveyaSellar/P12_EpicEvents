@@ -1,12 +1,17 @@
+import logging
 from datetime import date
 
 from models import Contract, User, Team
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids, check_field_and_length, check_email_field, \
-    check_phone_field, check_date_field
+from utils.helpers import get_ids
+from utils.db_helpers import commit_to_db
+
 from views.ContractView import ContractView
 from controller.EventController import EventController
 from types import SimpleNamespace
+
+logger = logging.getLogger(__name__)
+
 
 class ContractController:
 
@@ -36,10 +41,10 @@ class ContractController:
             elif remaining_amount > total_amount:
                 errors.append("Remaining amount can't be greater than total amount.")
 
-        if "is_signed" not in data:
+        """if "is_signed" not in data:
             errors.append("L'état de signature est obligatoire.")
         elif not isinstance(data["is_signed"], bool):
-            errors.append("Le champ 'is_signed' doit être un booléen.")
+            errors.append("Le champ 'is_signed' doit être un booléen.")"""
 
         return errors
 
@@ -74,16 +79,16 @@ class ContractController:
             total_amount=contract_data["total_amount"],
             remaining_amount=contract_data["remaining_amount"],
             creation_date=date.today(),
-            is_signed=contract_data["is_signed"],
+            is_signed=False,
             commercial_id=contract_data["commercial_id"]
         )
 
         self.session.add(new_contract)
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
         # Associer le contrat à l’événement
         event.contract_id = new_contract.id
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
         self.view.message_contract_added()
 
@@ -132,6 +137,9 @@ class ContractController:
             return
         # Récupérer l'objet dans la base
         contract = self.session.query(Contract).filter(Contract.id == id).first()
+        if contract.is_signed:
+            self.view.message_signed_no_update()
+            return
         # Récupérer tous les commerciaux
         sales_rep = (
             self.session.query(User)
@@ -144,7 +152,6 @@ class ContractController:
         data = {
             "total_amount": contract.total_amount,
             "remaining_amount": contract.remaining_amount,
-            "is_signed": contract.is_signed,
             "commercial_id": contract.commercial_id
         }
         errors = self.validate_contract_data(data)
@@ -154,5 +161,24 @@ class ContractController:
             self.view.message_updating_contract_failed(errors)
             return
         # Le mettre en base
-        self.session.commit()
+        commit_to_db(self.session, self.view)
         self.view.message_contract_updated()
+
+    def get_contracts_without_sign(self):
+        return self.session.query(Contract).filter(Contract.is_signed == False).all()
+
+    def sign_contract(self):
+        # Afficher les contrats sans signatures
+        contracts = self.get_contracts_without_sign()
+        self.view.show_contracts(contracts)
+        ids = get_ids(contracts)
+        # Choisir un contrat
+        id = self.view.get_signing_contract(ids)
+        # Modifier le champ signature
+        for contract in contracts:
+            if contract.id == id:
+                contract.is_signed = True
+                break
+        commit_to_db(self.session, self.view)
+        # Journaliser
+        logger.info(f"Contract {id} has been signed.")

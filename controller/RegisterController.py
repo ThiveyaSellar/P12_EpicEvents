@@ -3,6 +3,7 @@ from argon2 import PasswordHasher
 
 from controller.UserController import UserController
 from models import User, Team
+from utils.db_helpers import commit_to_db
 from utils.helpers import check_email_field, check_field_and_length, \
     check_phone_field, check_team_field
 from views.RegisterView import RegisterView
@@ -86,6 +87,6 @@ class RegisterController:
 
         # Enregistrement dans la base de données
         self.session.add(new_user)
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
         self.view.success_message(first_name, last_name)

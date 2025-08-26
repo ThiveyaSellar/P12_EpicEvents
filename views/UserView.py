@@ -25,9 +25,9 @@ class UserView:
 
     @staticmethod
     def get_co_worker(co_workers_ids, action):
-        id = int(click.prompt(f"Which co worker do you want to {action} ? "))
+        id = click.prompt(f"Which co worker do you want to {action} ? ",type=int)
         while id not in co_workers_ids:
-            id = int(click.prompt(f"Which co worker do you want to {action} ? "))
+            id = click.prompt(f"Which co worker do you want to {action} ? ",type=int)
         return id
 
     @staticmethod
@@ -37,6 +37,10 @@ class UserView:
     @staticmethod
     def message_co_worker_deleted():
         click.echo("Co_worker deleted.")
+
+    @staticmethod
+    def message_email_exists():
+        click.echo("An account with this email already exists.")
 
     @staticmethod
     def show_teams(teams, default_id):
@@ -64,7 +68,7 @@ class UserView:
     def ask_change_team(co_worker, teams):
         choice = click.prompt(
             "Do you want to change the team of the co-worker ? [Yes/No]")
-        while choice.lower() not in ['yes', 'no', 'y', 'n']:
+        while not choice or choice.lower() not in ['yes', 'no', 'y', 'n']:
             choice = click.prompt(
                 "Do you want change to the team of the co-worker ? [Yes/No]")
         if choice.lower() in ['yes', 'y']:
@@ -135,7 +139,7 @@ class UserView:
     def ask_change_sales_rep(client, sales_reps):
         choice = click.prompt(
             "Do you want to change the sale representative ? [Yes/No]")
-        while choice.lower() not in ['yes', 'no', 'y', 'n']:
+        while not choice or choice.lower() not in ['yes', 'no', 'y', 'n']:
             choice = click.prompt(
                 "Do you want change to the sale representative ? [Yes/No]")
         if choice.lower() in ['yes', 'y']:
@@ -185,9 +189,26 @@ class UserView:
     @staticmethod
     def message_adding_co_worker_failed(errors):
         click.echo("Co-worker has not been added.")
-        click.echo(errors)
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))
 
     @staticmethod
     def message_updating_co_worker_failed(errors):
         click.echo("Co-worker has not been updated.")
-        click.echo(errors)
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))
+
+    @staticmethod
+    def message_db_error(errors):
+        # Affiche proprement même si errors est une liste ou autre
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))

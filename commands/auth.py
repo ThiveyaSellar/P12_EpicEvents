@@ -2,6 +2,7 @@ import sys, click
 
 from controller.LoginController import LoginController
 from controller.RegisterController import RegisterController
+from controller.UserController import UserController
 from utils.validators import validate_email_callback, validate_name, \
     validate_phone_callback
 
@@ -47,6 +48,12 @@ def register_auth_commands(cli):
     def logout(ctx):
         controller = LoginController(ctx)
         controller.logout()
+
+    @cli.command()
+    @click.pass_context
+    def change_password(ctx):
+        controller = LoginController(ctx)
+        controller.change_password()
 
     @cli.command()
     @click.pass_context

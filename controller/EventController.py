@@ -1,6 +1,7 @@
 from controller.ClientController import ClientController
 from controller.UserController import UserController
 from models import Event, Team
+from utils.db_helpers import commit_to_db
 from views.EventView import EventView
 from utils.TokenManagement import TokenManagement
 from utils.helpers import get_ids, check_field_and_length, check_date_field, \
@@ -59,7 +60,7 @@ class EventController:
             self.view.message_updating_event_failed(errors)
             return
         # Le mettre en base
-        self.session.commit()
+        commit_to_db(self.session, self.view)
         self.view.message_event_updated()
 
     def validate_event_data(self, data):
@@ -102,7 +103,7 @@ class EventController:
             support_id=support_id
         )
         self.session.add(new_event)
-        self.session.commit()
+        commit_to_db(self.session, self.view)
         self.view.message_event_added()
 
     def list_events_without_support(self):
@@ -135,7 +136,7 @@ class EventController:
         support_id = user_controller.view.choose_support_collab(support_employees)
 
         event.support_id = support_id
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
 
 

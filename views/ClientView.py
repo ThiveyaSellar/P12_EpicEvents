@@ -49,6 +49,16 @@ class ClientView:
         click.echo("Client has not been added.")
         if errors:
             click.echo(errors)
+
+    @staticmethod
+    def message_client_updated():
+        click.echo("Client has been added.")
+
+    @staticmethod
+    def message_updating_client_failed(errors=""):
+        click.echo("Client has not been added.")
+        if errors:
+            click.echo(errors)
        
     @staticmethod 
     def show_sales_clients(clients):
@@ -109,3 +119,12 @@ class ClientView:
         client.commercial_id = new_commercial_id
 
         return client
+
+    @staticmethod
+    def message_db_error(errors):
+        # Affiche proprement même si errors est une liste ou autre
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))

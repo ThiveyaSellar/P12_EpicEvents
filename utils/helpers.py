@@ -1,6 +1,7 @@
 from datetime import datetime, date
 
 
+
 def get_ids(object_list):
     return [int(obj.id) for obj in object_list]
 
@@ -51,6 +52,7 @@ def check_number_field(data, field, errors):
         return
 
 def check_team_field(data, errors):
+    print(data)
     team = data.get("team")
     if team.lower() not in ['commercial','support','gestion']:
         errors.append("Team must either 'commercial', 'support', 'gestion'.")

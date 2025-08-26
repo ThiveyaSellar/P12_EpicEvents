@@ -35,3 +35,9 @@ def register_sales_rep_commands(cli):
     def list_unsigned_contracts(ctx):
         controller = ContractController(ctx)
         controller.list_unsigned_contracts()
+
+    @cli.command()
+    @click.pass_context
+    def sign_contract(ctx):
+        controller = ContractController(ctx)
+        controller.sign_contract()

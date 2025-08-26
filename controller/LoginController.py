@@ -5,8 +5,13 @@ from datetime import datetime, timedelta
 from sqlalchemy.exc import NoResultFound
 
 from utils.TokenManagement import TokenManagement
+from utils.db_helpers import commit_to_db
 
 from views.LoginView import LoginView
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 class LoginController:
 
@@ -14,6 +19,10 @@ class LoginController:
         self.view = LoginView()
         self.session = ctx.obj["session"]
         self.SECRET_KEY = ctx.obj["SECRET_KEY"]
+
+    def __hash_passwords(self, password):
+        ph = PasswordHasher()
+        return ph.hash(password)
 
 
     def check_user_mail(self, email):
@@ -71,12 +80,11 @@ class LoginController:
 
         # Sauvegarder le token de rafraichissement dans la base de données
         user.token = refresh_token
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
         # Ecrire les tokens dans le fichier netrc
         self.write_in_netrc(access_token, refresh_token)
         self.view.print_welcome_message(user)
-
 
     def logout(self):
         # Demander confirmation de déconnexion
@@ -93,3 +101,28 @@ class LoginController:
     def exit_program(self):
         self.view.print_exit_message()
 
+    def change_password(self):
+        # Afficher le mail de l'utilisateur courant et récupérer l'ancien mot de passe
+        connected, user = TokenManagement.checking_user_connection(
+            self.session,
+            self.SECRET_KEY)
+        # Demander l'ancien mot de passe
+        old_pwd = LoginView.ask_old_password(user.email_address)
+        ph = PasswordHasher()
+        while not self.verify_password(ph, user.password, old_pwd):
+            old_pwd = LoginView.ask_old_pwd_again()
+        # Demander le nouveau mot de passe
+        new_pwd, new_pwd_2 = LoginView.get_new_passwords()
+        while not new_pwd == new_pwd_2:
+            new_pwd, new_pwd_2 = LoginView.ask_new_passwords_again()
+
+        # Hachage du nouveau mot de passe
+        hashed_password = self.__hash_passwords(new_pwd)
+
+        user.password = hashed_password
+        commit_to_db(self.session,self.view)
+        netrc_path = TokenManagement.get_netrc_path()
+        machine = "127.0.0.1"
+        TokenManagement.update_tokens_in_netrc(machine, "", "", netrc_path)
+        self.view.confirm_update_and_login()
+        exit()

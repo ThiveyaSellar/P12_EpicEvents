@@ -77,7 +77,7 @@ class ContractView:
         contract = {}
         click.echo("Enter new contract informations :")
         contract["total_amount"], contract["remaining_amount"] = ContractView.ask_amounts()
-        contract["is_signed"] = click.confirm("Is it signed?", default=False)
+        # contract["is_signed"] = click.confirm("Is it signed?", default=False)
 
         return contract
 
@@ -116,8 +116,7 @@ class ContractView:
             "Enter new data or press [Enter] to keep the current value:")
         # Pour chaque champ, on propose la valeur actuelle
         contract.total_amount, contract.remaining_amount = ContractView.ask_amounts()
-        contract.is_signed = click.confirm("Is it signed ?",
-                                            default=contract.is_signed)
+        # contract.is_signed = click.confirm("Is it signed ?", default=contract.is_signed)
 
         new_commercial_id = UserView.ask_change_sales_rep(contract, sales_reps)
         if new_commercial_id:
@@ -159,3 +158,34 @@ class ContractView:
     def message_action_not_permitted():
         click.echo(
             "Only members of the Sales team are allowed to update a contract.")
+
+    @staticmethod
+    def message_db_error(errors):
+        # Affiche proprement même si errors est une liste ou autre
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))
+
+    @staticmethod
+    def get_signing_contract(ids):
+        if not ids:
+            click.echo("No contracts.")
+            return
+        id = click.prompt(
+            "Which contract do you want to sign ? [Enter to skip]", default="", show_default=False)
+        if id == "":
+            return
+        while not id.isdigit() or int(id) not in ids:
+            click.echo("Invalid id.")
+            id = click.prompt(
+                "Which contract do you want to sign ? [Enter to skip]", show_default=False,
+                default="")
+            if id == "":
+                return
+        return int(id)
+
+    @staticmethod
+    def message_signed_no_update():
+        click.echo("Signed contracts can't be updated.")

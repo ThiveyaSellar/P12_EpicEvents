@@ -1,5 +1,6 @@
 import click
 
+
 class RegisterView:
 
     @staticmethod
@@ -18,3 +19,12 @@ class RegisterView:
     def message_registration_failed(errors):
         click.echo("Registration has failed.")
         click.echo(errors)
+
+    @staticmethod
+    def message_db_error(errors):
+        # Affiche proprement même si errors est une liste ou autre
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))

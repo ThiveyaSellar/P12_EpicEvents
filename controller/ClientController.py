@@ -7,6 +7,7 @@ from views.ClientView import ClientView
 from utils.TokenManagement import TokenManagement
 from utils.helpers import get_ids, check_field_and_length, check_email_field, \
     check_phone_field
+from utils.db_helpers import commit_to_db
 
 
 class ClientController:
@@ -52,7 +53,12 @@ class ClientController:
             commercial_id=user.id
         )
         self.session.add(new_client)
-        self.session.commit()
+        commit_to_db(
+            self.session,
+            self.view,
+            success_callback=self.view.message_client_added(),
+            error_callback=self.view.message_adding_client_failed()
+        )
         # Vérification si le client a été ajouté
         added_client = self.session.query(Client).filter_by(id=new_client.id).first()
 
@@ -104,27 +110,12 @@ class ClientController:
             return
         client.last_update=date.today()
         # Le mettre en base
-        self.session.commit()
-
-    def add(self):
-        # Afficher les événements sans supports
-        events = self.list_events_without_support()
-        events_ids = get_ids(events)
-        # Demander l'événement sans support à modifier
-        event_id = self.view.get_updating_event(events_ids)
-        event = self.session.query(Event).filter(Event.id == event_id).first()
-        if not event:
-            self.view.message_event_not_found()
-            return
-        # Afficher les collaborateurs support
-        ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
-        user_controller = UserController(SimpleNamespace(obj=ctx))
-        support_employees = user_controller.get_employees_from_team("Support")
-        support_id = user_controller.view.choose_support_collab(
-            support_employees)
-
-        event.support_id = support_id
-        self.session.commit()
+        commit_to_db(
+            self.session,
+            self.view,
+            success_callback=self.view.message_client_updated(),
+            error_callback=self.view.message_updating_client_failed()
+        )
 
     def add_sales_rep_collab_to_client(self):
         # Afficher les clients sans commerciaux
@@ -144,14 +135,7 @@ class ClientController:
             sales_reps)
 
         client.commercial_id = sales_rep_id
-        self.session.commit()
-
-    def list_events_without_support(self):
-        # Chercher les événements en base sans collaborateur
-        events_without_support = self.session.query(Event).filter(Event.support_id == None).all()
-        # Afficher les événements
-        self.view.show_events(events_without_support)
-        return events_without_support
+        commit_to_db(self.session, self.view)
 
     def list_clients_without_sales_rep(self):
         clients_without_sales_rep = self.session.query(Client).filter(Client.commercial_id == None).all()

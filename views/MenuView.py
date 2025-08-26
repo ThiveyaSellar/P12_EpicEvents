@@ -79,11 +79,13 @@ class MenuView:
             # Contract
             list-contracts
             update-contract
+            sign-contract
             list-unpaid-contracts
             list-unsigned-contracts
             # Event
             list-events
             create-event-for-my-client
+            change-password
             logout
         """)
         click.secho(menu, fg="yellow", bold=True)
@@ -100,6 +102,7 @@ class MenuView:
             list-clients
             # Contract
             list-contracts
+            change-password
             logout
         """)
         click.secho(menu, fg="yellow", bold=True)
@@ -125,6 +128,7 @@ class MenuView:
             list-events-without-support
             list-events-without-contract
             add-support-collab-to-event
+            change-password
             logout
         """)
         click.secho(menu, fg="yellow", bold=True)

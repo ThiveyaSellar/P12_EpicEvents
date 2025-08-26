@@ -2,6 +2,7 @@ from datetime import datetime
 
 import click
 
+
 class EventView:
 
     @staticmethod
@@ -14,7 +15,7 @@ class EventView:
             "Client", "Support", "Contract id", "Notes"
         )
         click.echo(row_format.format(*headers))
-        click.echo("-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 250)  # longueur estimée de la ligne, à ajuster si besoin
 
         for event in events:
             click.echo(row_format.format(
@@ -185,3 +186,12 @@ class EventView:
     @staticmethod
     def message_event_updated():
         click.echo("Event updated.")
+
+    @staticmethod
+    def message_db_error(errors):
+        # Affiche proprement même si errors est une liste ou autre
+        if isinstance(errors, list):
+            for e in errors:
+                click.echo(str(e))
+        else:
+            click.echo(str(errors))

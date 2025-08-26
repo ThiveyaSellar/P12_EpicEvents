@@ -59,6 +59,8 @@ register_common_commands(cli)
 
 def main():
 
+    logging.info("Lancement programme!")
+
     menu_controller = MenuController()
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
     connected, user = TokenManagement.checking_user_connection(session,

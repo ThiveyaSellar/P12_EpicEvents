@@ -4,9 +4,13 @@ from sqlalchemy import func
 
 from models import User, Team, Client, Contract, Event
 from utils.TokenManagement import TokenManagement
+from utils.db_helpers import commit_to_db
 from utils.helpers import get_ids, check_email_field, check_field_and_length, \
     check_phone_field, check_team_field
 from views.UserView import UserView
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserController:
@@ -28,13 +32,17 @@ class UserController:
 
     def validate_user_data(self, data):
         errors = []
+
         check_email_field(data, errors)
         check_field_and_length(data, "first_name", 100, errors)
         check_field_and_length(data, "last_name", 100, errors)
         check_phone_field(data, errors)
         check_team_field(data, errors)
-
         return errors
+
+    def email_exists_in_db(self, email):
+        user = self.session.query(User).filter_by(email_address=email).first()
+        return user is not None
 
     def create_co_worker(self, email, first_name, last_name, phone, team):
 
@@ -54,6 +62,12 @@ class UserController:
             "phone": phone,
             "team": team
         }
+
+        # Vérifier que l'email est unique
+        if self.email_exists_in_db(email):
+            self.view.message_email_exists()
+            return
+
         errors = self.validate_user_data(user_data)
         if errors:
             self.view.message_adding_co_worker_failed(errors)
@@ -71,9 +85,9 @@ class UserController:
 
         # Enregistrement dans la base de données
         self.session.add(new_user)
-        self.session.commit()
+        commit_to_db(self.session, self.view)
 
-        logging.info(f"A new user is created: {first_name} {last_name}")
+        logger.info(f"A new user is created: {first_name} {last_name}")
 
         self.view.success_message(first_name, last_name)
 
@@ -102,14 +116,16 @@ class UserController:
             "first_name": co_worker.first_name,
             "last_name": co_worker.last_name,
             "email": co_worker.email_address,
-            "phone": co_worker.phone
+            "phone": co_worker.phone,
+            "team": co_worker.team.name
         }
         errors = self.validate_user_data(data)
         if errors:
             self.view.message_updating_co_worker_failed(errors)
             return
         # Le mettre en base
-        self.session.commit()
+        commit_to_db(self.session, self.view)
+        logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been updated!")
 
     def update_co_worker_related_data(self, co_worker):
         if co_worker.team == "Commercial":
@@ -137,9 +153,10 @@ class UserController:
             self.update_co_worker_related_data(co_worker)
             # Supprimer le co-worker
             self.session.delete(co_worker)
-            self.session.commit()
+            commit_to_db(self.session, self.view)
         if not self.session.query(User).filter(co_worker.id == User.id).first():
             self.view.message_co_worker_deleted()
+            logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been deleted!")
         else:
             self.view.message_inexistent_co_worker()
 
