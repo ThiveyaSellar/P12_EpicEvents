@@ -212,3 +212,7 @@ class UserView:
                 click.echo(str(e))
         else:
             click.echo(str(errors))
+
+    @staticmethod
+    def message_no_sales_rep_available():
+        click.echo("No sales reps available.")

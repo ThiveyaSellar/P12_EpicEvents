@@ -26,7 +26,7 @@ def check_phone_field(data, errors):
     phone = data.get("phone", "")
     if not phone:
         errors.append("The phone is required.")
-    elif not phone.isdigit() or len(phone) > 12:
+    elif not phone.isdigit() or len(phone) != 10:
         errors.append("The phone is not valid or too long.")
 
 def check_date_field(data, field, errors):

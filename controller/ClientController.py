@@ -38,9 +38,17 @@ class ClientController:
         if errors:
             self.view.message_adding_client_failed(errors)
             return
-        # Get current commercial user id
-        user = TokenManagement.get_connected_user(self.session,
+
+        try:
+            # Get current commercial user id
+            user = TokenManagement.get_connected_user(self.session,
                                                   self.SECRET_KEY)
+            if user is None:
+                self.view.message_adding_client_failed("User not connected.")
+                return
+        except Exception as e:
+            self.view.message_adding_client_failed(f"Authentication error: {str(e)}")
+            return
 
         new_client = Client(
             first_name=client_data["first_name"],
@@ -52,20 +60,17 @@ class ClientController:
             last_update=date.today(),
             commercial_id=user.id
         )
+
         self.session.add(new_client)
-        commit_to_db(
+        success = commit_to_db(
             self.session,
             self.view,
-            success_callback=self.view.message_client_added(),
-            error_callback=self.view.message_adding_client_failed()
+            success_callback=self.view.message_client_added,
+            error_callback=self.view.message_adding_client_failed
         )
-        # Vérification si le client a été ajouté
-        added_client = self.session.query(Client).filter_by(id=new_client.id).first()
 
-        if added_client:
-            self.view.message_client_added()
-        else:
-            self.view.message_adding_client_failed()
+        if not success:
+            return
 
     def display_sales_clients(self):
         # Les événements attribués à l'utilisateur dans l'équipe support ?
@@ -110,19 +115,27 @@ class ClientController:
             return
         client.last_update=date.today()
         # Le mettre en base
-        commit_to_db(
+        success = commit_to_db(
             self.session,
             self.view,
-            success_callback=self.view.message_client_updated(),
-            error_callback=self.view.message_updating_client_failed()
+            success_callback=self.view.message_client_updated,
+            error_callback=self.view.message_updating_client_failed
         )
+        if not success:
+            return
 
     def add_sales_rep_collab_to_client(self):
         # Afficher les clients sans commerciaux
         clients = self.list_clients_without_sales_rep()
+        if not clients:
+            self.view.message_no_clients_available()
+            return
         clients_ids = get_ids(clients)
         # Demander le client sans commercial à modifier
         client_id = self.view.get_updating_client(clients_ids)
+        if not client_id:
+            self.view.message_client_not_choosen()
+            return
         client = self.session.query(Client).filter(Client.id == client_id).first()
         if not client:
             self.view.message_client_not_found()
@@ -131,6 +144,9 @@ class ClientController:
         ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
         user_controller = UserController(SimpleNamespace(obj=ctx))
         sales_reps = user_controller.get_employees_from_team("Commercial")
+        if not sales_reps:
+            user_controller.view.message_no_sales_rep_available()
+            return
         sales_rep_id = user_controller.view.choose_support_collab(
             sales_reps)
 

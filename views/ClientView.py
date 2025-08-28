@@ -41,6 +41,14 @@ class ClientView:
         return client
 
     @staticmethod
+    def message_no_clients_available():
+        click.echo("No clients without sales representative.")
+
+    @staticmethod
+    def message_client_not_choosen():
+        click.echo("Client id was not not selected.")
+
+    @staticmethod
     def message_client_added():
         click.echo("Client has been added.")
 
