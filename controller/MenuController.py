@@ -22,6 +22,8 @@ class MenuController:
             self.view.show_management_menu()
         elif team == "Support":
             self.view.show_support_menu()
+        else:
+            self.view.show_team_error()
 
     def create_main_menu(self, user, cli, session, SECRET_KEY):
         while True:

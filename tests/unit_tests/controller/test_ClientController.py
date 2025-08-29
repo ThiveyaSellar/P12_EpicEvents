@@ -33,15 +33,6 @@ class TestClientController:
 
         assert result == fake_clients
 
-    def display_sales_clients(self):
-        # Les événements attribués à l'utilisateur dans l'équipe support ?
-        user = TokenManagement.get_connected_user(self.session,
-                                                  self.SECRET_KEY)
-        clients = self.session.query(Client).filter(
-            Client.commercial.has(id=user.id)).all()
-        self.view.show_sales_clients(clients)
-        return clients
-
     def test_display_sales_clients(self, client_controller):
         fake_clients = [
             MagicMock(id=1, commercial_id=42),

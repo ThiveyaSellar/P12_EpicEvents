@@ -139,3 +139,7 @@ class MenuView:
         click.echo("list-clients")
         click.echo("list-events")
         click.echo("logout")
+
+    @staticmethod
+    def show_team_error():
+        click.echo("Unknown team!")
