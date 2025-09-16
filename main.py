@@ -65,6 +65,10 @@ def main():
     # Vérifier qu'il y a un token permettant d'identifier l'utilisateur et s'il est valide
     connected, user = TokenManagement.checking_user_connection(session,
                                                                SECRET_KEY)
+    if user is None:
+        logging.warning("Aucun utilisateur trouvé avec le token fourni.")
+        connected = False
+
     while not connected:
         # Menu avec soit inscription soit connexion
         # Execution des commandes login et register

@@ -14,10 +14,15 @@ from utils.TokenManagement import TokenManagement
 
 class RegisterController:
 
-    def __init__(self, ctx):
+    def __init__(self, ctx=None, session=None):
         self.view = RegisterView()
-        self.session =ctx.obj["session"]
-        self.SECRET_KEY = ctx.obj["SECRET_KEY"]
+        if session is not None:
+            self.session = session
+        elif ctx is not None:
+            self.session =ctx.obj["session"]
+        else:
+            raise ValueError("A session must be indicated.")
+        self.SECRET_KEY = ctx.obj["SECRET_KEY"] if ctx is not None else None
 
     def __hash_passwords(self, password):
         ph = PasswordHasher()
