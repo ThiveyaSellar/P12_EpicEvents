@@ -67,7 +67,11 @@ class ContractController:
             self.view.message_adding_contract_failed(errors)
             return
         # Récupérer le commercial associé à l'événement en récupérant le client
-        event = next((e for e in events if e.id == event_id), None)
+        event = None
+        for e in events:
+            if e.id == event_id:
+                event = e
+                break
 
         if not event:
             self.view.message_invalid_event()

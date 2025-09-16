@@ -139,9 +139,9 @@ class UserController:
                 contract.commercial_id = None
         elif co_worker.team == "Support":
             events = self.session.query(Event).filter(
-                Event.commercial_id == co_worker.id).all()
+                Event.support_id == co_worker.id).all()
             for event in events:
-                event.commercial_id = None
+                event.support_id = None
         elif co_worker.team == "Gestion":
             pass
 
@@ -154,9 +154,9 @@ class UserController:
             # Supprimer le co-worker
             self.session.delete(co_worker)
             commit_to_db(self.session, self.view)
-        if not self.session.query(User).filter(co_worker.id == User.id).first():
-            self.view.message_co_worker_deleted()
-            logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been deleted!")
+            if not self.session.query(User).filter(co_worker.id == User.id).first():
+                self.view.message_co_worker_deleted()
+                logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been deleted!")
         else:
             self.view.message_inexistent_co_worker()
 

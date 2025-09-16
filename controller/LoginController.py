@@ -106,6 +106,8 @@ class LoginController:
         connected, user = TokenManagement.checking_user_connection(
             self.session,
             self.SECRET_KEY)
+        if not connected or user is None:
+            return None
         # Demander l'ancien mot de passe
         old_pwd = LoginView.ask_old_password(user.email_address)
         ph = PasswordHasher()
