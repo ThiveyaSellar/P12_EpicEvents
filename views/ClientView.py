@@ -16,9 +16,15 @@ class ClientView:
             "Commercial"
         )
         click.echo(row_format.format(*headers))
-        click.echo("-" * 150)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 150)
 
         for client in clients:
+            if client.commercial:
+                first = client.commercial.first_name
+                last = client.commercial.last_name
+                commercial_name = f"{first} {last}"
+            else:
+                commercial_name = "N/A"
             click.echo(row_format.format(
                 client.id,
                 client.first_name,
@@ -26,7 +32,7 @@ class ClientView:
                 client.email_address,
                 client.phone,
                 client.company,
-                f"{client.commercial.first_name} {client.commercial.last_name}" if client.commercial else "N/A",
+                commercial_name
             ))
 
     @staticmethod
@@ -35,7 +41,10 @@ class ClientView:
         click.echo("Enter new client informations :")
         client["first_name"] = click.prompt("First name")
         client["last_name"] = click.prompt("Last name")
-        client["email_address"] = click.prompt("Email address", value_proc=validate_email)
+        client["email_address"] = click.prompt(
+            "Email address",
+            value_proc=validate_email
+        )
         client["phone"] = click.prompt("Phone", value_proc=validate_phone)
         client["company"] = click.prompt("Company name")
         return client
@@ -59,6 +68,10 @@ class ClientView:
             click.echo(errors)
 
     @staticmethod
+    def message_client_not_found():
+        click.echo("Client was not found.")
+
+    @staticmethod
     def message_client_updated():
         click.echo("Client has been added.")
 
@@ -67,8 +80,8 @@ class ClientView:
         click.echo("Client has not been added.")
         if errors:
             click.echo(errors)
-       
-    @staticmethod 
+
+    @staticmethod
     def show_sales_clients(clients):
         row_format = "{:<5} {:<20} {:<30} {:<15} {:<20} {:<15} {:<25} {:<20}"
 
@@ -77,9 +90,15 @@ class ClientView:
             "Last update", "Commercial"
         )
         click.echo(row_format.format(*headers))
-        click.echo("-"*150)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-"*150)
 
         for client in clients:
+            if client.commercial:
+                first = client.commercial.first_name
+                last = client.commercial.last_name
+                commercial_name = f"{first} {last}"
+            else:
+                commercial_name = "N/A"
             click.echo(row_format.format(
                 client.id,
                 f"{client.first_name} {client.last_name}",
@@ -88,7 +107,7 @@ class ClientView:
                 client.company,
                 str(client.creation_date),
                 str(client.last_update),
-                str(f"{client.commercial.first_name} {client.commercial.last_name}")
+                str(commercial_name)
             ))
 
     @staticmethod
@@ -103,7 +122,9 @@ class ClientView:
         while not id.isdigit() or int(id) not in client_ids:
             click.echo("Invalid id.")
             id = click.prompt(
-                "Which client do you want to update ? [Enter to skip]", default="")
+                "Which client do you want to update ? [Enter to skip]",
+                default=""
+            )
             if id == "":
                 return
         return int(id)
@@ -116,11 +137,24 @@ class ClientView:
         click.echo(
             "Enter new data or press [Enter] to keep the current value:")
         # Pour chaque champ, on propose la valeur actuelle
-        client.first_name = click.prompt("First name", default=client.first_name)
-        client.last_name = click.prompt("Last name",
-                                         default=client.last_name)
-        client.email_address= click.prompt("Email address", default=client.email_address, value_proc=validate_email)
-        client.phone = click.prompt("Phone", default=client.phone, value_proc=validate_phone)
+        client.first_name = click.prompt(
+            "First name",
+            default=client.first_name
+        )
+        client.last_name = click.prompt(
+            "Last name",
+            default=client.last_name
+        )
+        client.email_address = click.prompt(
+            "Email address",
+            default=client.email_address,
+            value_proc=validate_email
+        )
+        client.phone = click.prompt(
+            "Phone",
+            default=client.phone,
+            value_proc=validate_phone
+        )
         client.company = click.prompt("Company name", default=client.company)
 
         new_commercial_id = UserView.ask_change_sales_rep(client, sales_reps)

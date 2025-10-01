@@ -26,7 +26,7 @@ class TestMenuController:
         mock_cli.main.assert_called_once_with(['login'], standalone_mode=False)
 
     def test_show_team_menu_sales_menu(self, menu_controller):
-        team = "Commercial"
+        team = "Sales"
         menu_controller.show_team_menu(team)
         assert menu_controller.view.show_sales_menu.called
         assert not menu_controller.view.show_management_menu.called

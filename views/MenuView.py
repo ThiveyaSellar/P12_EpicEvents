@@ -1,7 +1,6 @@
 import textwrap
-from sentry_sdk import logger as sentry_logger
-
 import click
+
 
 class MenuView:
 
@@ -11,7 +10,10 @@ class MenuView:
 
     @staticmethod
     def message_already_connected():
-        click.echo("You are already logged. Please log out before using this command.")
+        click.echo(
+            "You are already logged."
+            "Please log out before using this command."
+        )
 
     @staticmethod
     def message_input_command():
@@ -45,22 +47,21 @@ class MenuView:
     def logout_message():
         click.echo("Logging out. Returning to the login menu...")
 
-
     @staticmethod
     def print_login_menu():
-        menu = (
-        "------------- Main -------------\n"
-        "Please enter a command:\n"
-        "register\n"
-        "login\n"
-        "exit"
-        )
+        menu = textwrap.dedent("""
+            ------------- Main -------------
+            Please enter a command:
+            register
+            login
+            exit
+        """)
         click.secho(menu, fg="yellow", bold=True)
 
     @staticmethod
     def show_login_menu():
 
-        options = {"register", "login", "exit"}
+        options = {"register", "login", "exit-program"}
         while True:
             MenuView.print_login_menu()
             cmd = MenuView.ask_cmd_input()

@@ -5,7 +5,7 @@ class RegisterView:
 
     @staticmethod
     def print_password_error():
-        click.echo(f"Passwords don't match.")
+        click.echo("Passwords don't match.")
 
     @staticmethod
     def success_message(first_name, last_name):

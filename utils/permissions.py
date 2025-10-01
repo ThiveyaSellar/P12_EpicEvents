@@ -5,7 +5,7 @@ all_permissions = [
     "list-events",
     "change-password",
     "logout",
-    "exit"
+    "exit-program"
 ]
 
 SALES_PERMISSIONS = all_permissions + \
@@ -40,13 +40,15 @@ MANAGEMENT_PERMISSIONS = all_permissions + \
                          ]
 
 PERMISSIONS = {
-    "Commercial": SALES_PERMISSIONS,
+    "Sales": SALES_PERMISSIONS,
     "Support": SUPPORT_PERMISSIONS,
-    "Gestion": MANAGEMENT_PERMISSIONS
+    "Management": MANAGEMENT_PERMISSIONS
 }
+
 
 def is_authorized(team, command, permissions):
     return command in permissions.get(team, [])
+
 
 def command_exists(command):
     for role in PERMISSIONS:

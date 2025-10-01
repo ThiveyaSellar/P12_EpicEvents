@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .user import User
     from .event import Event
 
+
 class Client(Base):
     __tablename__ = "client"
 

@@ -1,4 +1,8 @@
-import jwt, os
+import jwt
+import os
+
+from argon2.exceptions import VerificationError
+
 from models import User
 from argon2 import PasswordHasher
 from datetime import datetime, timedelta
@@ -13,6 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LoginController:
 
     def __init__(self, ctx):
@@ -20,10 +25,10 @@ class LoginController:
         self.session = ctx.obj["session"]
         self.SECRET_KEY = ctx.obj["SECRET_KEY"]
 
-    def __hash_passwords(self, password):
+    @staticmethod
+    def __hash_passwords(password):
         ph = PasswordHasher()
         return ph.hash(password)
-
 
     def check_user_mail(self, email):
         # Récupération utilisateur associé au mail
@@ -31,30 +36,35 @@ class LoginController:
 
         return self.session.query(User).filter_by(email_address=email).one()
 
-    def define_token(self, user, SECRET_KEY, time):
+    @staticmethod
+    def define_token(user, secret, time):
         payload = {
             "user_id": user.id,
             "email": user.email_address,
             "role": user.team.name,
-            "exp": datetime.now() + timedelta(minutes=time)
+            "exp": datetime.now() + timedelta(minutes=time),
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        token = jwt.encode(payload, secret, algorithm="HS256")
         return token
 
-    def write_in_netrc(self, access_token, refresh_token):
+    @staticmethod
+    def write_in_netrc(access_token, refresh_token):
         netrc_path = TokenManagement.get_netrc_path()
         machine = "127.0.0.1"
         if not os.path.exists(netrc_path):
-            TokenManagement.create_netrc_file(machine, access_token, refresh_token,
-                              netrc_path)
+            TokenManagement.create_netrc_file(
+                machine, access_token, refresh_token, netrc_path
+            )
         else:
-            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
-                                   netrc_path)
+            TokenManagement.update_tokens_in_netrc(
+                machine, access_token, refresh_token, netrc_path
+            )
 
-    def verify_password(self, ph, user_password, password):
+    @staticmethod
+    def verify_password(ph, user_password, password):
         try:
             return ph.verify(user_password, password)
-        except:
+        except VerificationError:
             return False
 
     def login(self, email, password):
@@ -66,6 +76,7 @@ class LoginController:
         try:
             user = self.check_user_mail(email.strip().lower())
         except NoResultFound:
+            logger.info(f"User not found: email {email}")
             self.view.print_user_not_found()
             return
         # Vérifier le mot de passe saisi
@@ -82,7 +93,7 @@ class LoginController:
         user.token = refresh_token
         commit_to_db(self.session, self.view)
 
-        # Ecrire les tokens dans le fichier netrc
+        # Écrire les tokens dans le fichier netrc
         self.write_in_netrc(access_token, refresh_token)
         self.view.print_welcome_message(user)
 
@@ -92,7 +103,7 @@ class LoginController:
         machine = "127.0.0.1"
         if logging_out:
             netrc_path = TokenManagement.get_netrc_path()
-            TokenManagement.update_tokens_in_netrc(machine,"","",netrc_path)
+            TokenManagement.update_tokens_in_netrc(machine, "", "", netrc_path)
             self.view.print_logged_out_message()
             exit()
         else:
@@ -102,10 +113,10 @@ class LoginController:
         self.view.print_exit_message()
 
     def change_password(self):
-        # Afficher le mail de l'utilisateur courant et récupérer l'ancien mot de passe
+        # Afficher mail utilisateur courant et récupérer ancien mot de passe
         connected, user = TokenManagement.checking_user_connection(
-            self.session,
-            self.SECRET_KEY)
+            self.session, self.SECRET_KEY
+        )
         if not connected or user is None:
             return None
         # Demander l'ancien mot de passe
@@ -122,7 +133,7 @@ class LoginController:
         hashed_password = self.__hash_passwords(new_pwd)
 
         user.password = hashed_password
-        commit_to_db(self.session,self.view)
+        commit_to_db(self.session, self.view)
         netrc_path = TokenManagement.get_netrc_path()
         machine = "127.0.0.1"
         TokenManagement.update_tokens_in_netrc(machine, "", "", netrc_path)

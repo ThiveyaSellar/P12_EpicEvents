@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from .client import Client
     from .contract import Contract
 
+
 class Event(Base):
     __tablename__ = "event"
 

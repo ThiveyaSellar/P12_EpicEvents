@@ -95,7 +95,7 @@ class TestRegisterController:
             "first_name": "first",
             "last_name": "last",
             "phone": "0102030405",
-            "team": "Commercial"
+            "team": "Sales"
         }
         with patch("controller.RegisterController.check_email_field"), \
                 patch("controller.RegisterController.check_field_and_length"), \
@@ -111,7 +111,7 @@ class TestRegisterController:
             "first_name": "first",
             "last_name": "last",
             "phone": "0102030405",
-            "team": "Commercial"
+            "team": "Sales"
         }
 
         errors = register_controller.validate_user_data(data)

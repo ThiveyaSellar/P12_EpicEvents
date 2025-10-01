@@ -2,6 +2,10 @@ from views.MenuView import MenuView
 from utils.permissions import is_authorized, command_exists, PERMISSIONS
 from utils.TokenManagement import TokenManagement
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class MenuController:
 
@@ -10,22 +14,22 @@ class MenuController:
 
     def create_login_menu(self, cli):
         cmd = self.view.show_login_menu()
-        if cmd == 'exit':
+        if cmd == "exit":
             exit()
         cli.main(cmd.split(), standalone_mode=False)
 
     def show_team_menu(self, team):
 
-        if team == "Commercial":
+        if team == "Sales":
             self.view.show_sales_menu()
-        elif team == "Gestion":
+        elif team == "Management":
             self.view.show_management_menu()
         elif team == "Support":
             self.view.show_support_menu()
         else:
             self.view.show_team_error()
 
-    def create_main_menu(self, user, cli, session, SECRET_KEY):
+    def create_main_menu(self, user, cli, session, secret):
         while True:
             try:
                 if user is None:
@@ -34,8 +38,7 @@ class MenuController:
                 self.show_team_menu(team)
                 # Vérifier si l'utilisateur est toujours connecté
                 connected, user = TokenManagement.checking_user_connection(
-                    session,
-                    SECRET_KEY
+                    session, secret
                 )
                 if not connected:
                     self.view.print_connection_error()
@@ -58,6 +61,7 @@ class MenuController:
                     self.view.message_unauthorized_cmd(team)
             except Exception as e:
                 self.view.print_error_message(e)
+                logger.info(f"Error: {e}")
                 break
 
     def logout(self):

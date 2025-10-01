@@ -1,12 +1,18 @@
-import string, logging, random
+import string
+import logging
+import random
 from argon2 import PasswordHasher
-from sqlalchemy import func
 
 from models import User, Team, Client, Contract, Event
 from utils.TokenManagement import TokenManagement
 from utils.db_helpers import commit_to_db
-from utils.helpers import get_ids, check_email_field, check_field_and_length, \
-    check_phone_field, check_team_field
+from utils.helpers import (
+    get_ids,
+    check_email_field,
+    check_field_and_length,
+    check_phone_field,
+    check_team_field,
+)
 from views.UserView import UserView
 
 
@@ -15,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class UserController:
 
-    def __init__(self,ctx):
+    def __init__(self, ctx):
         self.view = UserView()
         self.session = ctx.obj["session"]
         self.SECRET_KEY = ctx.obj["SECRET_KEY"]
@@ -23,14 +29,16 @@ class UserController:
     @staticmethod
     def generate_password(length=12):
         chars = string.ascii_letters + string.digits + string.punctuation
-        password = ''.join(random.choices(chars, k=length))
+        password = "".join(random.choices(chars, k=length))
         return password
 
-    def __hash_passwords(self, password):
+    @staticmethod
+    def __hash_passwords(password):
         ph = PasswordHasher()
         return ph.hash(password)
 
-    def validate_user_data(self, data):
+    @staticmethod
+    def validate_user_data(data):
         errors = []
 
         check_email_field(data, errors)
@@ -60,7 +68,7 @@ class UserController:
             "first_name": first_name,
             "last_name": last_name,
             "phone": phone,
-            "team": team
+            "team": team,
         }
 
         # Vérifier que l'email est unique
@@ -80,7 +88,7 @@ class UserController:
             last_name=last_name,
             email_address=email.strip().lower(),
             phone=phone,
-            team_id=team_id
+            team_id=team_id,
         )
 
         # Enregistrement dans la base de données
@@ -102,14 +110,14 @@ class UserController:
         # Récupérer les IDs
         co_workers_ids = get_ids(co_workers)
         # Demander de choisir un collaborateur selon l'action
-        id = self.view.get_co_worker(co_workers_ids, action_name)
+        co_w_id = self.view.get_co_worker(co_workers_ids, action_name)
         # Retourner l'objet User
-        return self.session.query(User).filter(User.id == id).first()
+        return self.session.query(User).filter(User.id == co_w_id).first()
 
     def update_co_worker(self):
         co_worker = self.select_co_worker("update")
         # Récupérer toutes les équipes
-        teams = (self.session.query(Team).all())
+        teams = self.session.query(Team).all()
         # Le modifier
         co_worker = self.view.get_co_worker_new_data(co_worker, teams)
         data = {
@@ -117,7 +125,7 @@ class UserController:
             "last_name": co_worker.last_name,
             "email": co_worker.email_address,
             "phone": co_worker.phone,
-            "team": co_worker.team.name
+            "team": co_worker.team.name,
         }
         errors = self.validate_user_data(data)
         if errors:
@@ -125,26 +133,38 @@ class UserController:
             return
         # Le mettre en base
         commit_to_db(self.session, self.view)
-        logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been updated!")
+        logger.info(
+            f"User {co_worker.first_name} {co_worker.last_name}\
+            has been updated!"
+        )
 
     def update_co_worker_related_data(self, co_worker):
         if co_worker.team == "Commercial":
-            clients = self.session.query(Client).filter(
-                Client.commercial_id == co_worker.id).all()
+            clients = (
+                self.session.query(Client)
+                .filter(Client.commercial_id == co_worker.id)
+                .all()
+            )
             for client in clients:
                 client.commercial_id = None
-            contracts = self.session.query(Contract).filter(
-                Contract.commercial_id == co_worker.id).all()
+            contracts = (
+                self.session.query(Contract)
+                .filter(Contract.commercial_id == co_worker.id)
+                .all()
+            )
             for contract in contracts:
                 contract.commercial_id = None
         elif co_worker.team == "Support":
-            events = self.session.query(Event).filter(
-                Event.support_id == co_worker.id).all()
+            events = (
+                self.session
+                .query(Event)
+                .filter(Event.support_id == co_worker.id)
+                .all()
+            )
             for event in events:
                 event.support_id = None
-        elif co_worker.team == "Gestion":
+        elif co_worker.team == "Management":
             pass
-
 
     def delete_co_worker(self):
         co_worker = self.select_co_worker("delete")
@@ -154,24 +174,35 @@ class UserController:
             # Supprimer le co-worker
             self.session.delete(co_worker)
             commit_to_db(self.session, self.view)
-            if not self.session.query(User).filter(co_worker.id == User.id).first():
+            if not self.session.query(User).filter(co_worker.id == User.id)\
+                    .first():
                 self.view.message_co_worker_deleted()
-                logger.info(f"User {co_worker.first_name} {co_worker.last_name} has been deleted!")
+                logger.info(
+                    f"User {co_worker.first_name} {co_worker.last_name}\
+                     has been deleted!"
+                )
         else:
             self.view.message_inexistent_co_worker()
 
     def get_my_clients(self):
-        "As a sale representative"
-        user = TokenManagement.get_connected_user(self.session,
-                                                  self.SECRET_KEY)
-        clients = self.session.query(Client).filter(Client.commercial_id == user.id).all()
+        user = TokenManagement.get_connected_user(
+            self.session, self.SECRET_KEY
+        )
+        clients = (
+            self.session
+            .query(Client)
+            .filter(Client.commercial_id == user.id)
+            .all()
+        )
         self.view.show_my_clients(clients)
         return clients
 
-    def get_employees_from_team(self,team):
-        employees = self.session.query(User).join(Team).filter(func.lower(Team.name) == team.lower()).all()
+    def get_employees_from_team(self, team):
+        employees = (
+            self.session.query(User)
+                .join(Team, User.team_id == Team.id)
+                .filter(Team.name.ilike(team))
+                .all()
+        )
+
         return employees
-
-
-
-

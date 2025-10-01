@@ -8,16 +8,25 @@ class EventView:
     @staticmethod
     def show_events(events):
 
-        row_format = "{:<10} {:<30} {:<12} {:<12} {:<50} {:<15} {:<20} {:<15} {:<15} {:<30}"
+        row_format = (
+            "{:<10} {:<30} {:<12} {:<12} {:<50} "
+            "{:<15} {:<20} {:<15} {:<15} {:<30}"
+        )
 
         headers = (
-            "Id","Name", "Start Date", "End Date", "Address", "Attendees",
+            "Id", "Name", "Start Date", "End Date", "Address", "Attendees",
             "Client", "Support", "Contract id", "Notes"
         )
         click.echo(row_format.format(*headers))
-        click.echo("-" * 250)  # longueur estimée de la ligne, à ajuster si besoin
+        click.echo("-" * 250)
 
         for event in events:
+            if event.support:
+                first = event.support.first_name
+                last = event.support.last_name
+                support_name = f"{first} {last}"
+            else:
+                support_name = "N/A"
             click.echo(row_format.format(
                 event.id,
                 event.name,
@@ -26,7 +35,7 @@ class EventView:
                 event.address,
                 event.nb_attendees,
                 event.client.company if event.client else "N/A",
-                f"{event.support.first_name} {event.support.last_name}" if event.support else "N/A",
+                support_name,
                 event.contract.id if event.contract else "N/A",
                 event.notes
             ))
@@ -34,7 +43,10 @@ class EventView:
     @staticmethod
     def show_support_events(events):
 
-        row_format = "{:<5} {:<30} {:<15} {:<15} {:<30} {:<10} {:<20} {:<10} {:<12}"
+        row_format = (
+            "{:<5} {:<30} {:<15} {:<15} {:<30} "
+            "{:<10} {:<20} {:<10} {:<12}"
+        )
 
         headers = (
             "Id", "Name", "Start Date", "End Date", "Address", "Attendees",
@@ -69,7 +81,9 @@ class EventView:
         if event is None:
             click.echo("Event not existent, can't be updated.")
             return
-        click.echo("Enter new data or press [Enter] to keep the current value:")
+        click.echo(
+            "Enter new data or press [Enter] to keep the current value:"
+        )
         # Pour chaque champ, on propose la valeur actuelle
         event.name = click.prompt("Event name", default=event.name)
         event.start_date = click.prompt("Starting date",
@@ -91,9 +105,13 @@ class EventView:
             return
         while not id.isdigit() or int(id) not in client_ids:
             click.echo(
-                "Verify the client ID. You need to create the client before the event.")
-            id = click.prompt(f"For which client ? {client_ids} [Enter to skip]",
-                              default=None)
+                "Verify the client ID."
+                "You need to create the client before the event."
+            )
+            id = click.prompt(
+                f"For which client ? {client_ids} [Enter to skip]",
+                default=None
+            )
             if id is None:
                 return
         return int(id)
@@ -101,13 +119,17 @@ class EventView:
     @staticmethod
     def select_support_for_event(support_ids):
         id = click.prompt(
-            f"Which support agent do you want to assign for the event? {support_ids} [Enter to skip]", default="")
+            "Which support agent do you want to assign for the event?"
+            f" {support_ids} [Enter to skip]",
+            default=""
+        )
         if id == "":
             return
         while not id.isdigit() or int(id) not in support_ids:
             click.echo("Verify the support Id.")
             id = click.prompt(
-                f"Which support agent do you want to assign for the event? {support_ids} [Enter to skip]",
+                "Which support agent do you want to assign for the event?"
+                f" {support_ids} [Enter to skip]",
                 default=None)
             if id is None:
                 return
@@ -117,9 +139,18 @@ class EventView:
     def ask_date(date_type, default=None):
         default_date = default if default else None
         while True:
-            string_date = click.prompt(f"Enter a {date_type} date (YYYY-MM-DD)", default=default_date, show_default=default_date is not None)
+            string_date = click.prompt(
+                f"Enter a {date_type} date (YYYY-MM-DD)",
+                default=default_date,
+                show_default=default_date is not None
+            )
             try:
-                date_obj = datetime.strptime(string_date.strip(), "%Y-%m-%d").date()
+                date_obj = (
+                    datetime.strptime(
+                        string_date.strip(),
+                        "%Y-%m-%d"
+                    ).date()
+                )
                 return date_obj
             except ValueError:
                 click.echo("Invalid format, use YYYY-MM-DD (ex : 2025-08-01)")
@@ -159,15 +190,23 @@ class EventView:
         click.echo("Enter new event informations :")
         event["name"] = click.prompt("Name")
         event["start_date"], event["end_date"] = EventView.ask_period()
-        event["address"] = click.prompt("Address", default="", show_default=False)
+        event["address"] = click.prompt(
+            "Address",
+            default="",
+            show_default=False
+        )
         event["nb_attendees"] = click.prompt("Number of attendees", type=int)
-        event["notes"]  = EventView.ask_notes()
+        event["notes"] = EventView.ask_notes()
 
         return event
 
     @staticmethod
     def message_event_not_found():
         click.echo("Event not found.")
+
+    @staticmethod
+    def message_no_events():
+        click.echo("No events found.")
 
     @staticmethod
     def message_adding_event_failed(errors):

@@ -1,11 +1,15 @@
-from controller.ClientController import ClientController
 from controller.UserController import UserController
-from models import Event, Team
+from models import Event
 from utils.db_helpers import commit_to_db
 from views.EventView import EventView
 from utils.TokenManagement import TokenManagement
-from utils.helpers import get_ids, check_field_and_length, check_date_field, \
-    check_number_field, check_field_length
+from utils.helpers import (
+    get_ids,
+    check_field_and_length,
+    check_date_field,
+    check_number_field,
+    check_field_length,
+)
 from types import SimpleNamespace
 
 
@@ -18,17 +22,27 @@ class EventController:
 
     def get_all_events(self):
         events = self.session.query(Event).all()
+        if not events:
+            self.view.message_no_events()
+            return
         self.view.show_events(events)
         return events
 
     def display_support_events(self):
         # Les événements attribués à l'utilisateur dans l'équipe support ?
-        user = TokenManagement.get_connected_user(self.session, self.SECRET_KEY)
-        events = self.session.query(Event).filter(Event.support.has(id=user.id)).all()
+        user = TokenManagement.get_connected_user(
+            self.session,
+            self.SECRET_KEY
+        )
+        events = self.session\
+            .query(Event)\
+            .filter(Event.support.has(id=user.id))\
+            .all()
         self.view.show_support_events(events)
         return events
 
-    def get_event_ids_without_contract(self, events):
+    @staticmethod
+    def get_event_ids_without_contract(events):
         event_ids = []
         for event in events:
             if event.contract_id is None:
@@ -38,12 +52,15 @@ class EventController:
     def update_support_events(self):
         # Afficher tous les événements de l'utilisateur support
         events = self.display_support_events()
+        if not events:
+            self.view.message_no_events()
+            return
         # Récupérer tous les ids des événements
         event_ids = get_ids(events)
         # Demander de choisir un événement
-        id = self.view.get_updating_event(event_ids)
+        event_id = self.view.get_updating_event(event_ids)
         # Récupérer l'objet dans la base
-        event = self.session.query(Event).filter(Event.id==id).first()
+        event = self.session.query(Event).filter(Event.id == event_id).first()
         # Récupérer les nouvelles données dans un dictionnaire
         # Le modifier
         event = self.view.get_event_new_data(event)
@@ -53,7 +70,7 @@ class EventController:
             "end_date": event.end_date,
             "address": event.address,
             "nb_attendees": event.nb_attendees,
-            "notes": event.notes
+            "notes": event.notes,
         }
         errors = self.validate_event_data(data)
         if errors:
@@ -63,7 +80,8 @@ class EventController:
         commit_to_db(self.session, self.view)
         self.view.message_event_updated()
 
-    def validate_event_data(self, data):
+    @staticmethod
+    def validate_event_data(data):
         errors = []
         check_field_and_length(data, "name", 100, errors)
         check_date_field(data, "start_date", errors)
@@ -72,7 +90,6 @@ class EventController:
         check_number_field(data, "nb_attendees", errors)
         check_field_length(data, "notes", 100, errors)
         return errors
-
 
     def create_event_for_my_client(self):
         # Afficher mes clients
@@ -100,7 +117,7 @@ class EventController:
             nb_attendees=event_data["nb_attendees"],
             notes=event_data["notes"],
             client_id=client_id,
-            support_id=support_id
+            support_id=support_id,
         )
         self.session.add(new_event)
         commit_to_db(self.session, self.view)
@@ -108,14 +125,18 @@ class EventController:
 
     def list_events_without_support(self):
         # Chercher les événements en base sans collaborateur
-        events_without_support = self.session.query(Event).filter(Event.support_id == None).all()
+        events_without_support = (
+            self.session.query(Event).filter(Event.support_id.is_(None)).all()
+        )
         # Afficher les événements
         self.view.show_events(events_without_support)
         return events_without_support
 
     def list_events_without_contract(self):
         # Chercher les événements en base sans collaborateur
-        events_without_contract = self.session.query(Event).filter(Event.contract_id == None).all()
+        events_without_contract = (
+            self.session.query(Event).filter(Event.contract_id.is_(None)).all()
+        )
         # Afficher les événements
         self.view.show_events(events_without_contract)
 
@@ -133,13 +154,9 @@ class EventController:
         ctx = {"session": self.session, "SECRET_KEY": self.SECRET_KEY}
         user_controller = UserController(SimpleNamespace(obj=ctx))
         support_employees = user_controller.get_employees_from_team("Support")
-        support_id = user_controller.view.choose_support_collab(support_employees)
+        support_id = user_controller.view.choose_support_collab(
+            support_employees
+        )
 
         event.support_id = support_id
         commit_to_db(self.session, self.view)
-
-
-
-
-
-

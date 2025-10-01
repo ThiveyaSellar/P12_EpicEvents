@@ -1,11 +1,14 @@
-import jwt, os
+import os
 from argon2 import PasswordHasher
 
-from controller.UserController import UserController
 from models import User, Team
 from utils.db_helpers import commit_to_db
-from utils.helpers import check_email_field, check_field_and_length, \
-    check_phone_field, check_team_field
+from utils.helpers import (
+    check_email_field,
+    check_field_and_length,
+    check_phone_field,
+    check_team_field,
+)
 from views.RegisterView import RegisterView
 from utils.validators import validate_password
 
@@ -19,31 +22,35 @@ class RegisterController:
         if session is not None:
             self.session = session
         elif ctx is not None:
-            self.session =ctx.obj["session"]
+            self.session = ctx.obj["session"]
         else:
             raise ValueError("A session must be indicated.")
         self.SECRET_KEY = ctx.obj["SECRET_KEY"] if ctx is not None else None
 
-    def __hash_passwords(self, password):
+    @staticmethod
+    def __hash_passwords(password):
         ph = PasswordHasher()
         return ph.hash(password)
 
-    def write_in_netrc(self, access_token, refresh_token):
+    @staticmethod
+    def write_in_netrc(access_token, refresh_token):
         netrc_path = TokenManagement.get_netrc_path()
         machine = "127.0.0.1"
         if not os.path.exists(netrc_path):
-            TokenManagement.create_netrc_file(machine, access_token, refresh_token,
-                              netrc_path)
+            TokenManagement.create_netrc_file(
+                machine, access_token, refresh_token, netrc_path
+            )
         else:
-            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token,
-                                   netrc_path)
-
+            TokenManagement.update_tokens_in_netrc(
+                machine, access_token, refresh_token, netrc_path
+            )
 
     def email_exists_in_db(self, email):
         user = self.session.query(User).filter_by(email_address=email).first()
         return user is not None
 
-    def validate_user_data(self, data):
+    @staticmethod
+    def validate_user_data(data):
         errors = []
         check_email_field(data, errors)
         check_field_and_length(data, "first_name", 100, errors)
@@ -53,7 +60,16 @@ class RegisterController:
 
         return errors
 
-    def register(self, email, password, password2, first_name, last_name, phone, team):
+    def register(
+            self,
+            email,
+            password,
+            password2,
+            first_name,
+            last_name,
+            phone,
+            team
+    ):
 
         if self.email_exists_in_db(email):
             self.view.message_email_exists()
@@ -74,7 +90,7 @@ class RegisterController:
             "first_name": first_name,
             "last_name": last_name,
             "phone": phone,
-            "team": team
+            "team": team,
         }
         errors = self.validate_user_data(user_data)
         if errors:
@@ -87,7 +103,7 @@ class RegisterController:
             last_name=last_name,
             email_address=email.strip().lower(),
             phone=phone,
-            team_id=team_id
+            team_id=team_id,
         )
 
         # Enregistrement dans la base de données

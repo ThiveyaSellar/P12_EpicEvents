@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def commit_to_db(session, view, success_callback=None, error_callback=None):
     """
     Essaie de commit la session.

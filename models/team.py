@@ -7,6 +7,7 @@ from .base import Base
 if TYPE_CHECKING:
     from .user import User
 
+
 class Team(Base):
     __tablename__ = "team"
     id: Mapped[int] = mapped_column(primary_key=True)

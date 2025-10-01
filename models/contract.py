@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .user import User
     from .event import Event
 
+
 class Contract(Base):
     __tablename__ = "contract"
 
@@ -20,4 +21,6 @@ class Contract(Base):
     commercial_id = mapped_column(ForeignKey("user.id"))
 
     commercial: Mapped["User"] = relationship(back_populates="contracts")
-    event: Mapped["Event"] = relationship(back_populates="contract", uselist=False)
+    event: Mapped["Event"] = relationship(
+        back_populates="contract", uselist=False
+    )

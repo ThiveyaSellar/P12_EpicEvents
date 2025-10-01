@@ -1,6 +1,7 @@
 import click
 from controller.EventController import EventController
 
+
 def register_support_commands(cli):
     @cli.command()
     @click.pass_context

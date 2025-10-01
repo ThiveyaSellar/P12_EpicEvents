@@ -26,7 +26,7 @@ def register_management_commands(cli):
     @click.option("--phone", prompt="Numéro de téléphone",
                   callback=validate_phone_callback, help="Son téléphone")
     @click.option("--team",
-                  type=click.Choice(["Commercial", "Gestion", "Support"],
+                  type=click.Choice(["Sales", "Management", "Support"],
                                     case_sensitive=False),
                   prompt="Son équipe", help="Son équipe")
     def create_co_worker(ctx, email, first_name, last_name, phone, team):

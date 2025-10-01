@@ -22,6 +22,9 @@ class ContractController:
 
     def list_contracts(self):
         contracts = self.session.query(Contract).all()
+        if len(contracts) == 0:
+            self.view.message_no_contract()
+            return
         self.view.show_contracts(contracts)
         return contracts
 
@@ -31,15 +34,15 @@ class ContractController:
         total_amount = data.get("total_amount")
         if total_amount is None:
             errors.append("Total amount is required.")
-        elif not isinstance(total_amount,int) or total_amount <= 0:
+        elif not isinstance(total_amount, int) or total_amount <= 0:
             errors.append("Total amount must be an int greater than 0.")
 
         remaining_amount = data.get("remaining_amount")
         if remaining_amount is not None:
             if not isinstance(remaining_amount, int) or remaining_amount < 0:
-                errors.append("Remaining amount must be an int greater than 0.")
+                errors.append("Remaining amount must be > 0.")
             elif remaining_amount > total_amount:
-                errors.append("Remaining amount can't be greater than total amount.")
+                errors.append("Remaining amount can't be > total amount.")
 
         """if "is_signed" not in data:
             errors.append("L'état de signature est obligatoire.")
@@ -77,8 +80,13 @@ class ContractController:
             self.view.message_invalid_event()
             return
 
-        # S'il n'y a pas de commercial associé au client, le commercial n'est pas attaché au contrat
-        contract_data["commercial_id"] = event.client.commercial_id if event.client.commercial else None
+        # Si pas de commercial associé au client
+        # le commercial n'est pas attaché au contrat
+        if event.client.commercial:
+            contract_data["commercial_id"] = event.client.commercial_id
+        else:
+            contract_data["commercial_id"] = None
+
         new_contract = Contract(
             total_amount=contract_data["total_amount"],
             remaining_amount=contract_data["remaining_amount"],
@@ -97,12 +105,28 @@ class ContractController:
         self.view.message_contract_added()
 
     def list_unpaid_contracts(self):
-        unpaid_contracts = self.session.query(Contract).filter(Contract.remaining_amount!=0).all()
+        unpaid_contracts = (
+            self.session
+            .query(Contract)
+            .filter(Contract.remaining_amount != 0)
+            .all()
+        )
+        if not unpaid_contracts:
+            self.view.message_no_contract()
+            return
         self.view.show_contracts(unpaid_contracts)
 
     def list_unsigned_contracts(self):
         # Récupérer les contrats sans signature dans la base de données
-        unsigned_contracts = self.session.query(Contract).filter_by(is_signed=False).all()
+        unsigned_contracts = (
+            self.session
+            .query(Contract)
+            .filter_by(is_signed=False)
+            .all()
+        )
+        if not unsigned_contracts:
+            self.view.message_no_contract()
+            return
         # Afficher les contrats non signés
         self.view.show_contracts(unsigned_contracts)
 
@@ -114,9 +138,9 @@ class ContractController:
         # Vérifier qu'il est commercial, qu'il a le droit
         # Récupérer l'id de l'équipe du commercial
         sales_rep_team_id = self.session.query(Team).filter(
-            Team.name == "Commercial").first().id
+            Team.name == "Sales").first().id
         management_team_id = self.session.query(Team).filter(
-            Team.name == "Gestion").first().id
+            Team.name == "Management").first().id
 
         if user.team_id == sales_rep_team_id:
             # Chercher les contrats du commercial connecté dans la base
@@ -140,7 +164,12 @@ class ContractController:
         if not id:
             return
         # Récupérer l'objet dans la base
-        contract = self.session.query(Contract).filter(Contract.id == id).first()
+        contract = (
+            self.session
+            .query(Contract)
+            .filter(Contract.id == id)
+            .first()
+        )
         if contract.is_signed:
             self.view.message_signed_no_update()
             return
@@ -148,7 +177,7 @@ class ContractController:
         sales_rep = (
             self.session.query(User)
                 .join(User.team)
-                .filter(Team.name == "Commercial")
+                .filter(Team.name == "Sales")
                 .all()
         )
         # Le modifier
@@ -159,7 +188,8 @@ class ContractController:
             "commercial_id": contract.commercial_id
         }
         errors = self.validate_contract_data(data)
-        if data["commercial_id"] is not None and data["commercial_id"] not in get_ids(sales_rep):
+        is_commercial = data["commercial_id"] is not None
+        if is_commercial and data["commercial_id"] not in get_ids(sales_rep):
             errors.append("Commercial_id is not valid.")
         if errors:
             self.view.message_updating_contract_failed(errors)
@@ -169,7 +199,13 @@ class ContractController:
         self.view.message_contract_updated()
 
     def get_contracts_without_sign(self):
-        return self.session.query(Contract).filter(Contract.is_signed == False).all()
+        contracts = (
+            self.session
+            .query(Contract)
+            .filter(Contract.is_signed.is_(False))
+            .all()
+        )
+        return contracts
 
     def sign_contract(self):
         # Afficher les contrats sans signatures

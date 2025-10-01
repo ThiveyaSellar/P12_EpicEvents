@@ -9,25 +9,32 @@ class ContractView:
 
     @staticmethod
     def show_contracts(contracts):
-        if len(contracts) == 0:
-            click.echo("No contracts found.")
-            return
         row_format = "{:<5} {:<15} {:<20} {:<12} {:<10} {:<12}"
         headers = (
             "Id", "Total Amount", "Remaining Amount", "Date", "Signed",
-            "Commercial"
+            "Sales rep"
         )
         click.echo(row_format.format(*headers))
         click.echo("-" * 90)
 
         for contract in contracts:
+            if contract.remaining_amount is not None:
+                remaining_amount = contract.remaining_amount
+            else:
+                remaining_amount = "N/A"
+            if contract.commercial:
+                first = contract.commercial.first_name
+                last = contract.commercial.last_name
+                commercial_name = f"{first} {last}"
+            else:
+                commercial_name = "N/A"
             click.echo(row_format.format(
                 contract.id,
                 contract.total_amount,
-                contract.remaining_amount if contract.remaining_amount is not None else "N/A",
+                remaining_amount,
                 contract.creation_date.strftime("%Y-%m-%d"),
                 "Yes" if contract.is_signed else "No",
-                f"{contract.commercial.first_name} {contract.commercial.last_name}" if contract.commercial else "N/A",
+                commercial_name,
             ))
 
     @staticmethod
@@ -37,7 +44,10 @@ class ContractView:
         if id is None:
             return
         while not id.isdigit() or int(id) not in event_ids:
-            click.echo("Verify the event ID. The event must exist and must not be linked to any contract.")
+            click.echo(
+                "Verify the event ID."
+                "The event must exist and must not be linked to any contract."
+            )
             id = click.prompt(f"For which event ? {event_ids} [Enter to skip]",
                               default=None)
             if id is None:
@@ -57,16 +67,22 @@ class ContractView:
             if total_amount <= 0:
                 click.echo("Total amount must be greater than 0.")
                 continue
-            remaining_amount = click.prompt("Remaining amount", type=int,
-                                            default=remaining_default,
-                                            show_default=remaining_default is not None)
+            remaining_amount = click.prompt(
+                "Remaining amount",
+                type=int,
+                default=remaining_default,
+                show_default=remaining_default is not None
+            )
             if remaining_amount <= 0:
-                click.echo("Remaining amount must be greater than or equal to 0.")
+                click.echo("Remaining amount must be >= 0.")
                 continue
             if remaining_amount <= total_amount and total_amount > 0:
                 break
             if remaining_amount > total_amount:
-                click.echo("Remaining amount must be less than or equal to total amount. Please try again.")
+                click.echo(
+                    "Remaining amount must be <= total amount."
+                    "Please try again."
+                )
                 continue
             click.echo("Please try again.")
         return total_amount, remaining_amount
@@ -76,9 +92,10 @@ class ContractView:
 
         contract = {}
         click.echo("Enter new contract informations :")
-        contract["total_amount"], contract["remaining_amount"] = ContractView.ask_amounts()
+        total, remaining = ContractView.ask_amounts()
         # contract["is_signed"] = click.confirm("Is it signed?", default=False)
-
+        contract["total_amount"] = total
+        contract["remaining_amount"] = remaining
         return contract
 
     @staticmethod
@@ -86,7 +103,9 @@ class ContractView:
         phone = value
         pattern = r"^0[1-9](\d{2}){4}$"
         if not re.match(pattern, phone):
-            raise click.BadParameter("The phone number start with the digit 0 and must have 10 digits.")
+            raise click.BadParameter(
+                "Phone number must start with the 0 and must have 10 digits."
+            )
         return phone
 
     @staticmethod
@@ -95,14 +114,19 @@ class ContractView:
             click.echo("No contracts.")
             return
         id = click.prompt(
-            "Which contract do you want to update ? [Enter to skip]", default="", show_default=False)
+            "Which contract do you want to update ? [Enter to skip]",
+            default="",
+            show_default=False
+        )
         if id == "":
             return
         while not id.isdigit() or int(id) not in contract_ids:
             click.echo("Invalid id.")
             id = click.prompt(
-                "Which contract do you want to update ? [Enter to skip]", show_default=False,
-                default="")
+                "Which contract do you want to update ? [Enter to skip]",
+                show_default=False,
+                default=""
+            )
             if id == "":
                 return
         return int(id)
@@ -113,11 +137,13 @@ class ContractView:
             click.echo("contract not existent, can't be updated.")
             return
         click.echo(
-            "Enter new data or press [Enter] to keep the current value:")
+            "Enter new data or press [Enter] to keep the current value:"
+        )
         # Pour chaque champ, on propose la valeur actuelle
-        contract.total_amount, contract.remaining_amount = ContractView.ask_amounts()
-        # contract.is_signed = click.confirm("Is it signed ?", default=contract.is_signed)
+        total, remaining = ContractView.ask_amounts()
 
+        contract.total_amount = total
+        contract.remaining_amount = remaining
         new_commercial_id = UserView.ask_change_sales_rep(contract, sales_reps)
         if new_commercial_id:
             contract.commercial_id = new_commercial_id
@@ -174,14 +200,19 @@ class ContractView:
             click.echo("No contracts.")
             return
         id = click.prompt(
-            "Which contract do you want to sign ? [Enter to skip]", default="", show_default=False)
+            "Which contract do you want to sign ? [Enter to skip]",
+            default="",
+            show_default=False
+        )
         if id == "":
             return
         while not id.isdigit() or int(id) not in ids:
             click.echo("Invalid id.")
             id = click.prompt(
-                "Which contract do you want to sign ? [Enter to skip]", show_default=False,
-                default="")
+                "Which contract do you want to sign ? [Enter to skip]",
+                show_default=False,
+                default=""
+            )
             if id == "":
                 return
         return int(id)

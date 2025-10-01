@@ -1,5 +1,6 @@
 import click
 
+
 class LoginView:
 
     @staticmethod
@@ -24,7 +25,8 @@ class LoginView:
         choice = ""
         while choice not in ("y", "n"):
             choice = input(
-                "Are you confirming your disconnection ? (y/n) : ").strip().lower()
+                "Are you confirming your disconnection ? (y/n) : "
+            ).strip().lower()
             if choice not in ("y", "n"):
                 print("Please input 'y' for yes or 'n' for no.")
 
@@ -57,13 +59,16 @@ class LoginView:
 
     @staticmethod
     def ask_old_password(email):
-        click.echo(f"Email : {email}")
+        click.echo(f"Email: {email}")
         return click.prompt("Old password", hide_input=True)
 
     @staticmethod
     def get_new_passwords():
         new_password = click.prompt("New password", hide_input=True)
-        new_password_2 = click.prompt("Confirm your new password", hide_input=True)
+        new_password_2 = click.prompt(
+            "Confirm your new password",
+            hide_input=True
+        )
         return new_password, new_password_2
 
     @staticmethod
@@ -75,5 +80,8 @@ class LoginView:
     def ask_new_passwords_again():
         click.echo("Passwords don't match, please try again.")
         new_password = click.prompt("New password", hide_input=True)
-        new_password_2 = click.prompt("Confirm your new password", hide_input=True)
+        new_password_2 = click.prompt(
+            "Confirm your new password",
+            hide_input=True
+        )
         return new_password, new_password_2

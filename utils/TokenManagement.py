@@ -1,7 +1,11 @@
-import click, jwt, os, platform
+import click
+import jwt
+import os
+import platform
 from datetime import datetime, timezone, timedelta
 
 from models import User
+
 
 class TokenManagement:
 
@@ -11,7 +15,7 @@ class TokenManagement:
             file.write(f"machine {machine}\n")
             file.write(f"access-token {access_token}\n")
             file.write(f"refresh-token {refresh_token}\n")
-        print(f"Le fichier .netrc a été créé et les informations ajoutées à {netrc_path}")
+        print(f"Fichier .netrc créé et informations ajoutées à {netrc_path}")
 
     @staticmethod
     def get_netrc_path():
@@ -19,6 +23,8 @@ class TokenManagement:
         os_name = platform.system()
         if os_name == "Windows":
             netrc_path = os.path.join(os.environ["USERPROFILE"], ".netrc")
+        else:
+            netrc_path = ""
         return netrc_path
 
     @staticmethod
@@ -36,7 +42,7 @@ class TokenManagement:
         if access_token != "":
             access_token_line = f"  access-token {access_token}\n"
         if refresh_token != "":
-            refresh_token_line= f"  refresh-token {refresh_token}\n"
+            refresh_token_line = f"  refresh-token {refresh_token}\n"
 
         # Chercher la section de la machine
         machine_index = None
@@ -127,7 +133,10 @@ class TokenManagement:
     @staticmethod
     def get_token():
         netrc_path = TokenManagement.get_netrc_path()
-        access_token, refresh_token = TokenManagement.get_tokens_from_netrc("127.0.0.1", netrc_path)
+        access_token, refresh_token = TokenManagement.get_tokens_from_netrc(
+            "127.0.0.1",
+            netrc_path
+        )
         if access_token and refresh_token:
             # Vérifier la validité des tokens
             if TokenManagement.is_token_expired(access_token):
@@ -137,16 +146,16 @@ class TokenManagement:
         return None
 
     @staticmethod
-    def generate_token(payload, secret_key):
+    def generate_token(payload, secret):
         token = jwt.encode(
             payload=payload,
-            key=secret_key,
+            key=secret,
             algorithm="HS256"
         )
         return token
 
     @staticmethod
-    def generate_tokens(user, SECRET_KEY):
+    def generate_tokens(user, secret):
 
         payload_access = {
             "user_id": user.id,
@@ -160,14 +169,24 @@ class TokenManagement:
             "role": user.team.name,
             "exp": datetime.now() + timedelta(minutes=10)
         }
-        access_token = TokenManagement.generate_token(payload_access, SECRET_KEY)
-        refresh_token = TokenManagement.generate_token(payload_refresh, SECRET_KEY)
+        access_token = TokenManagement.generate_token(
+            payload_access,
+            secret
+        )
+        refresh_token = TokenManagement.generate_token(
+            payload_refresh,
+            secret
+        )
         return access_token, refresh_token
 
     @staticmethod
-    def get_user_from_access_token(access_token, SECRET_KEY, session):
+    def get_user_from_access_token(access_token, secret, session):
         try:
-            payload = jwt.decode(access_token, SECRET_KEY, algorithms=["HS256"])
+            payload = jwt.decode(
+                access_token,
+                secret,
+                algorithms=["HS256"]
+            )
             user_id = payload.get("user_id")
             user = session.get(User, user_id)
             return user
@@ -179,14 +198,17 @@ class TokenManagement:
             return None
 
     @staticmethod
-    def checking_user_connection(session, SECRET_KEY):
+    def checking_user_connection(session, secret):
         # Nom du serveur ou domaine
         machine = "127.0.0.1"
         # Chemin du fichier .netrc
         netrc_path = TokenManagement.get_netrc_path()
         connected = False
         # Chercher les tokens dans le fichier
-        access_token, refresh_token = TokenManagement.get_tokens_from_netrc(machine, netrc_path)
+        access_token, refresh_token = TokenManagement.get_tokens_from_netrc(
+            machine,
+            netrc_path
+        )
 
         # Si pas de token, pas connecté et pas d'utilisateur
         if not access_token or not refresh_token:
@@ -196,7 +218,11 @@ class TokenManagement:
         # Récupération des données utilisateurs dans le token
         if not TokenManagement.is_token_expired(access_token):
             # Récupérer les informations de l'utilisateur dans le jeton d'accès
-            user = TokenManagement.get_user_from_access_token(access_token, SECRET_KEY, session)
+            user = TokenManagement.get_user_from_access_token(
+                access_token,
+                secret,
+                session
+            )
             connected = True
             return connected, user
 
@@ -204,19 +230,26 @@ class TokenManagement:
         if not TokenManagement.is_token_expired(refresh_token):
             # Récupération des données utilisateurs dans le token
             user = TokenManagement.get_user_from_access_token(
-                refresh_token, SECRET_KEY, session
+                refresh_token, secret, session
             )
             # Générer de nouveaux tokens
-            access_token, refresh_token = TokenManagement.generate_tokens(user, SECRET_KEY)
-            TokenManagement.update_tokens_in_netrc(machine, access_token, refresh_token, netrc_path)
+            access_token, refresh_token = TokenManagement.generate_tokens(
+                user,
+                secret
+            )
+            TokenManagement.update_tokens_in_netrc(
+                machine,
+                access_token,
+                refresh_token,
+                netrc_path
+            )
             connected = True
             return connected, user
 
         return connected, None
 
-
     @staticmethod
-    def get_connected_user(session, SECRET_KEY):
+    def get_connected_user(session, secret):
         """
         L'utilisateur est connecté, on veut l'objet lié
         """
@@ -225,7 +258,5 @@ class TokenManagement:
         access_token, refresh_token = TokenManagement.get_tokens_from_netrc(
             machine, netrc_path)
         user = TokenManagement.get_user_from_access_token(access_token,
-                                                          SECRET_KEY, session)
+                                                          secret, session)
         return user
-
-

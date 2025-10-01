@@ -1,5 +1,6 @@
 import click
 
+
 class UserView:
 
     def success_message(self, first_name, last_name):
@@ -25,9 +26,15 @@ class UserView:
 
     @staticmethod
     def get_co_worker(co_workers_ids, action):
-        id = click.prompt(f"Which co worker do you want to {action} ? ",type=int)
+        id = click.prompt(
+            f"Which co worker do you want to {action} ? ",
+            type=int
+        )
         while id not in co_workers_ids:
-            id = click.prompt(f"Which co worker do you want to {action} ? ",type=int)
+            id = click.prompt(
+                f"Which co worker do you want to {action} ? ",
+                type=int
+            )
         return id
 
     @staticmethod
@@ -60,8 +67,9 @@ class UserView:
             click.prompt("New team id", default=str(default_id)))
         while team_id not in valid_ids:
             click.echo("Invalid ID. Please choose a valid ID from the list.")
-            team_id = str(click.prompt("New team id",
-                                           default=str(default_id)))
+            team_id = str(click.prompt(
+                "New team id",
+                default=str(default_id)))
         return int(team_id)
 
     @staticmethod
@@ -79,13 +87,20 @@ class UserView:
         if co_worker is None:
             click.echo("Co_worker not existent, can't be updated.")
             return
-        click.echo("Enter new data or press [Enter] to keep the current value:")
+        click.echo("Enter new data or press [Enter] to keep current value:")
         # Pour chaque champ, on propose la valeur actuelle
-        co_worker.first_name = click.prompt("First name", default=co_worker.first_name)
-        co_worker.last_name = click.prompt("Last name",
-                                            default=co_worker.last_name)
-        co_worker.email_address = click.prompt("Email address",
-                                        default=co_worker.email_address)
+        co_worker.first_name = click.prompt(
+            "First name",
+            default=co_worker.first_name
+        )
+        co_worker.last_name = click.prompt(
+            "Last name",
+            default=co_worker.last_name
+        )
+        co_worker.email_address = click.prompt(
+            "Email address",
+            default=co_worker.email_address
+        )
         co_worker.phone = click.prompt("Phone", default=co_worker.phone)
         UserView.ask_change_team(co_worker, teams)
 
@@ -114,28 +129,6 @@ class UserView:
         return int(sale_rep_id)
 
     @staticmethod
-    def show_sales_reps(sales_reps, default_id):
-        row_format = "{:<10} {:<40}"
-        headers = (
-            "Id", "Name"
-        )
-        click.echo(row_format.format(*headers))
-        click.echo("-------------------")
-        for sale_rep in sales_reps:
-            click.echo(row_format.format(
-                sale_rep.id,
-                f"{sale_rep.first_name} {sale_rep.last_name}",
-            ))
-        valid_ids = [str(s.id) for s in sales_reps]
-        sale_rep_id = str(
-            click.prompt("New sale rep id", default=str(default_id)))
-        while sale_rep_id not in valid_ids:
-            click.echo("Invalid ID. Please choose a valid ID from the list.")
-            sale_rep_id = str(click.prompt("New sale rep id",
-                                           default=str(default_id)))
-        return int(sale_rep_id)
-
-    @staticmethod
     def ask_change_sales_rep(client, sales_reps):
         choice = click.prompt(
             "Do you want to change the sale representative ? [Yes/No]")
@@ -143,9 +136,13 @@ class UserView:
             choice = click.prompt(
                 "Do you want change to the sale representative ? [Yes/No]")
         if choice.lower() in ['yes', 'y']:
-            new_commercial_id = UserView.show_sales_reps(sales_reps,
-                                                           client.commercial_id)
+            new_commercial_id = UserView.show_sales_reps(
+                sales_reps,
+                client.commercial_id
+            )
             return new_commercial_id
+        elif choice.lower() in ['no', 'n']:
+            return client.commercial_id
         return
 
     @staticmethod
@@ -180,10 +177,17 @@ class UserView:
             ))
         valid_ids = [str(s.id) for s in support_employees]
         support_id = str(
-            click.prompt("Which support co_worker do you want to add to the event ? "))
+            click.prompt(
+                "Which support co_worker do you want to add to the event? "
+            )
+        )
         while support_id not in valid_ids:
             click.echo("Invalid ID. Please choose a valid ID from the list.")
-            support_id = str(click.prompt("Which support co_worker do you want to add to the event ? "))
+            support_id = str(
+                click.prompt(
+                    "Which support co_worker do you want to add to the event? "
+                )
+            )
         return support_id
 
     @staticmethod
@@ -216,3 +220,7 @@ class UserView:
     @staticmethod
     def message_no_sales_rep_available():
         click.echo("No sales reps available.")
+
+    @staticmethod
+    def message_inexistent_co_worker():
+        click.echo("Co worker is inexistent.")

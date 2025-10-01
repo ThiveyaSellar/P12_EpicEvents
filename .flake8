@@ -1,0 +1,2 @@
+[flake8]
+exclude=.pytest_cache/,alembic/,env/,tests/,.coverage,alembic.ini,config.ini,README.md,requirements.txt

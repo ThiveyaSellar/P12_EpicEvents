@@ -2,6 +2,7 @@ import configparser
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+
 class Settings:
 
     def __init__(self):
@@ -35,9 +36,13 @@ class Settings:
         # Connexion à la base de données qu'une seule fois
         if self.engine is None and self.conn is None:
             # Créer objet de connexion à la base de données
-            # Ajouter echo=True pour afficher les logs des commandes SQL, retirer en production
+            # echo=True affiche logs commandes SQL, à retirer en production
+            db_user = self.database_config.db_user
+            db_password = self.database_config.db_password
+            db_host = self.database_config.db_host
+            db_name = self.database_config.db_name
             self.engine = create_engine(
-                f"mysql+pymysql://{self.database_config.db_user}:{self.database_config.db_password}@{self.database_config.db_host}/{self.database_config.db_name}",
+                f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}",
                 echo=False
             )
             self.conn = self.engine.connect()
@@ -64,4 +69,3 @@ class DatabaseConfig:
         self.db_password = config['database']['password']
         self.db_host = config['database']['host']
         self.db_name = config['database']['dbname']
-

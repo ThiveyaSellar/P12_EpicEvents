@@ -115,7 +115,7 @@ class TestUserController:
     def test_update_co_worker_related_data_commercial(self, user_controller):
         co_worker = MagicMock()
         co_worker.id = 1
-        co_worker.team = "Commercial"
+        co_worker.team = "Sales"
 
         fake_clients = [MagicMock(commercial_id=1), MagicMock(commercial_id=1)]
         fake_contracts = [MagicMock(commercial_id=1)]
@@ -155,7 +155,7 @@ class TestUserController:
         co_worker.id = 1
         co_worker.first_name = "First"
         co_worker.last_name = "Last"
-        co_worker.team = "Commercial"
+        co_worker.team = "Sales"
 
         user_controller.select_co_worker = MagicMock(return_value=co_worker)
         user_controller.update_co_worker_related_data = MagicMock()

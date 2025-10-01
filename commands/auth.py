@@ -1,8 +1,8 @@
-import sys, click
+import sys
+import click
 
 from controller.LoginController import LoginController
 from controller.RegisterController import RegisterController
-from controller.UserController import UserController
 from utils.validators import validate_email_callback, validate_name, \
     validate_phone_callback
 
@@ -34,7 +34,7 @@ def register_auth_commands(cli):
     @click.option("--phone", prompt="Phone number",
                   callback=validate_phone_callback, help="Your phone number")
     @click.option("--team",
-                  type=click.Choice(["Commercial", "Gestion", "Support"],
+                  type=click.Choice(["Sales", "Management", "Support"],
                                     case_sensitive=False),
                   prompt="Team", help="Your team")
     def register(ctx, email, password, password2, first_name, last_name, phone,
@@ -57,7 +57,7 @@ def register_auth_commands(cli):
 
     @cli.command()
     @click.pass_context
-    def exit(ctx):
+    def exit_program(ctx):
         controller = LoginController(ctx)
         controller.exit_program()
         sys.exit()
