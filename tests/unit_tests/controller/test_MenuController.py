@@ -33,7 +33,7 @@ class TestMenuController:
         assert not menu_controller.view.show_support_menu.called
 
     def test_show_team_menu_management_menu(self, menu_controller):
-        team = "Gestion"
+        team = "Management"
         menu_controller.show_team_menu(team)
         assert not menu_controller.view.show_sales_menu.called
         assert menu_controller.view.show_management_menu.called

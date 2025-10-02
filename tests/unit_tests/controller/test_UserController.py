@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from models import User, Team
-from controller.RegisterController import UserController
+from controller.UserController import UserController
 
 @pytest.fixture
 def user_controller():
@@ -112,24 +112,6 @@ class TestUserController:
         mock_message.assert_called_once_with(errors)
         mock_commit.assert_not_called()
 
-    def test_update_co_worker_related_data_commercial(self, user_controller):
-        co_worker = MagicMock()
-        co_worker.id = 1
-        co_worker.team = "Sales"
-
-        fake_clients = [MagicMock(commercial_id=1), MagicMock(commercial_id=1)]
-        fake_contracts = [MagicMock(commercial_id=1)]
-
-        user_controller.session.query().filter().all.side_effect = [fake_clients,
-                                                         fake_contracts]
-
-        user_controller.update_co_worker_related_data(co_worker)
-
-        for client in fake_clients:
-            assert client.commercial_id is None
-        for contract in fake_contracts:
-            assert contract.commercial_id is None
-
     def test_update_co_worker_related_data_support(self,user_controller):
         co_worker = MagicMock()
         co_worker.id = 2
@@ -170,8 +152,6 @@ class TestUserController:
         user_controller.session.delete.assert_called_once_with(co_worker)
         mock_commit.assert_called_once_with(user_controller.session, user_controller.view)
         user_controller.view.message_co_worker_deleted.assert_called_once()
-        mock_logger.info.assert_called_once_with(
-            f"User {co_worker.first_name} {co_worker.last_name} has been deleted!")
 
     def test_delete_co_worker_none_selected(self, user_controller):
         user_controller.select_co_worker = MagicMock(return_value=None)

@@ -19,13 +19,18 @@ class TokenManagement:
 
     @staticmethod
     def get_netrc_path():
-        # Afficher le système d'exploitation
-        os_name = platform.system()
-        if os_name == "Windows":
-            netrc_path = os.path.join(os.environ["USERPROFILE"], ".netrc")
+        """
+        Retourne le chemin complet du fichier .netrc de l'utilisateur.
+        Fonctionne sur Windows, macOS et Linux.
+        """
+        home_dir = os.path.expanduser("~")
+        netrc_path = os.path.join(home_dir, ".netrc")
+
+        if os.path.exists(netrc_path):
+            return netrc_path
         else:
-            netrc_path = ""
-        return netrc_path
+            print(".netrc n'existe pas")
+            return None
 
     @staticmethod
     def update_tokens_in_netrc(machine, access_token, refresh_token,
